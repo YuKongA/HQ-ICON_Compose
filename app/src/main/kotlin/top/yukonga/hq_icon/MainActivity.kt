@@ -1,15 +1,22 @@
-package top.yukonga.hqicon
+package top.yukonga.hq_icon
 
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +38,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.ImageSearch
@@ -38,7 +46,6 @@ import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,11 +60,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -70,27 +79,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import top.yukonga.hqicon.data.Data
-import top.yukonga.hqicon.ui.theme.HQICONTheme
-import top.yukonga.hqicon.utils.Search
+import top.yukonga.hq_icon.data.Data
+import top.yukonga.hq_icon.data.Response
+import top.yukonga.hq_icon.ui.theme.HqIconTheme
+import top.yukonga.hq_icon.utils.AppContext
+import top.yukonga.hq_icon.utils.Download
+import top.yukonga.hq_icon.utils.LoadIcon
+import top.yukonga.hq_icon.utils.Preferences
+import top.yukonga.hq_icon.utils.Search
+import top.yukonga.hq_icon.utils.Utils
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        AppContext.init(this)
 
         enableEdgeToEdge()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
@@ -113,32 +136,35 @@ fun App() {
         label = ""
     )
 
-    val appName = remember { mutableStateOf("QQ") }
-    val country = remember { mutableStateOf("CN") }
-    val platformCode = remember { mutableStateOf("software") }
-    val resolutionCode = remember { mutableStateOf("256") }
-    val cutStateCode = remember { mutableStateOf("0") }
-    val limit = remember { mutableIntStateOf(15) }
+    val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
+    val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
+    val platformCode = remember { mutableStateOf(Preferences().perfGet("platform") ?: "software") }
+    val resolutionCode = remember { mutableStateOf(Preferences().perfGet("resolution") ?: "512") }
+    val cornerStateCode = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
+    val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
+    val limit = remember { mutableIntStateOf(5) }
+    val resultsState: MutableState<List<Response.Result>> = remember { mutableStateOf(emptyList()) }
 
-    Log.d("platformCode", platformCode.value)
-    Log.d("resolutionCode", resolutionCode.value)
-    Log.d("cutStateCode", cutStateCode.value)
-
-    HQICONTheme {
+    HqIconTheme {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = { TopAppBar(scrollBehavior) },
-            floatingActionButton = { FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit) },
+            floatingActionButton = { FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, resultsState, cornerStateCode, cornerState) },
             floatingActionButtonPosition = FabPosition.End
         ) { padding ->
             Column(
                 modifier = Modifier
                     .padding(top = padding.calculateTopPadding())
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                    .padding(horizontal = 20.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+
             ) {
                 MainCardView(appName, country)
-                SecondView(Data().platformNames, Data().resolutionNames, Data().cutStateNames, platformCode, resolutionCode, cutStateCode)
+                SecondView(Data().platformNames, Data().resolutionNames, Data().cornerStateNames, platformCode, resolutionCode, cornerStateCode)
+                ResultsView(resultsState.value, resolutionCode.value, cornerState.value)
             }
         }
     }
@@ -147,14 +173,7 @@ fun App() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
-    CenterAlignedTopAppBar(
-        colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
-            scrolledContainerColor = MaterialTheme.colorScheme.background,
-        ),
+    TopAppBar(
         title = {
             Text(
                 text = stringResource(R.string.app_name),
@@ -162,7 +181,14 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
                 fontWeight = FontWeight.Bold
             )
         },
-        navigationIcon = { AboutDialog() },
+        actions = { AboutDialog() },
+        colors = TopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            scrolledContainerColor = MaterialTheme.colorScheme.background,
+        ),
         scrollBehavior = scrollBehavior
     )
 }
@@ -189,7 +215,7 @@ fun AboutDialog() {
                         .fillMaxWidth()
                         .size(280.dp, 150.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Row(modifier = Modifier.padding(24.dp)) {
                         Box(
@@ -267,16 +293,27 @@ private fun FloatActionButton(
     fabOffsetHeight: Dp,
     term: MutableState<String>,
     country: MutableState<String>,
-    entity: MutableState<String>,
-    limit: MutableState<Int>
+    platform: MutableState<String>,
+    limit: MutableState<Int>,
+    resultsState: MutableState<List<Response.Result>>,
+    cornerStateCode: MutableState<String>,
+    cornerState: MutableState<String>
 ) {
     val coroutineScope = rememberCoroutineScope()
     ExtendedFloatingActionButton(
         modifier = Modifier.offset(y = fabOffsetHeight),
         onClick = {
             coroutineScope.launch {
-                val results = Search().search(term.value, country.value, entity.value, limit.value)
-                Log.d("search", results)
+                if (term.value != "") {
+                    val results = Search().search(term.value, country.value, platform.value, limit.value)
+                    val response = Utils().json.decodeFromString<Response.Root>(results)
+                    cornerState.value = cornerStateCode.value
+                    resultsState.value = response.results
+                    Preferences().perfSet("appName", term.value)
+                    Preferences().perfSet("country", country.value)
+                    Preferences().perfSet("platform", platform.value)
+                    Preferences().perfSet("corner", cornerState.value)
+                }
             }
         },
         containerColor = Color(0xFF0D84FF),
@@ -324,7 +361,6 @@ fun AppNameView(
         shape = RoundedCornerShape(10.dp),
         leadingIcon = { Icon(imageVector = Icons.Outlined.ImageSearch, null) },
     )
-
 }
 
 @Composable
@@ -337,185 +373,6 @@ fun CountryView(
         label = stringResource(R.string.country),
         leadingIcon = Icons.Outlined.TravelExplore,
     )
-}
-
-@Composable
-fun SecondView(
-    platform: List<String>,
-    resolution: List<String>,
-    cutState: List<String>,
-    platformCode: MutableState<String>,
-    resolutionCode: MutableState<String>,
-    cutStateCode: MutableState<String>
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Card(
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 16.dp)
-        ) {
-            PlatformView(platform, platformCode)
-        }
-        Card(
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            modifier = Modifier.weight(1f)
-        ) {
-            CutView(cutState, cutStateCode)
-        }
-    }
-    Card(
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        ResolutionView(resolution, resolutionCode)
-    }
-}
-
-@Composable
-fun PlatformView(
-    platform: List<String>,
-    platformCode: MutableState<String>
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.platform)
-        )
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(platform[0]) }
-        Column(
-            modifier = Modifier.selectableGroup(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            platform.forEach { text ->
-                Row(
-                    Modifier.selectable(
-                        selected = (text == selectedOption),
-                        onClick = {
-                            onOptionSelected(text)
-                            platformCode.value = Data().platformCode(text)
-                        },
-                        role = Role.RadioButton
-                    )
-                ) {
-                    RadioButton(
-                        selected = (text == selectedOption),
-                        onClick = null
-                    )
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CutView(
-    cutState: List<String>,
-    cutStateCode: MutableState<String>
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.corner)
-        )
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(cutState[0]) }
-        Column(
-            modifier = Modifier.selectableGroup(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            cutState.forEach { text ->
-                Row(
-                    Modifier
-                        .selectable(
-                            selected = (text == selectedOption),
-                            onClick = {
-                                onOptionSelected(text)
-                                cutStateCode.value = Data().cutStateCode(text)
-                            },
-                            role = Role.RadioButton
-                        )
-                ) {
-                    RadioButton(
-                        selected = (text == selectedOption),
-                        onClick = null
-                    )
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ResolutionView(
-    resolution: List<String>,
-    resolutionCode: MutableState<String>
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.resolution)
-        )
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(resolution[0]) }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            resolution.forEach { text ->
-                Row(
-                    modifier = Modifier
-                        .selectable(
-                            selected = (text == selectedOption),
-                            onClick = {
-                                onOptionSelected(text)
-                                resolutionCode.value = Data().resolutionCode(text)
-                            },
-                            role = Role.RadioButton
-                        )
-                ) {
-                    RadioButton(
-                        selected = (text == selectedOption),
-                        onClick = null
-                    )
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-        }
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -564,4 +421,298 @@ fun TextFieldWithDropdown(
             }
         }
     }
+}
+
+@Composable
+fun SecondView(
+    platform: List<String>,
+    resolution: List<String>,
+    cornerState: List<String>,
+    platformCode: MutableState<String>,
+    resolutionCode: MutableState<String>,
+    cornerStateCode: MutableState<String>
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 10.dp)
+        ) {
+            PlatformView(platform, platformCode)
+        }
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 10.dp)
+        ) {
+            CornerView(cornerState, cornerStateCode)
+        }
+    }
+    Card(
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ResolutionView(resolution, resolutionCode)
+    }
+}
+
+@Composable
+fun PlatformView(
+    platform: List<String>,
+    platformCode: MutableState<String>
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.platform)
+        )
+        val platformName = Preferences().perfGet("platform")?.let { Data().platformName(it) }
+        val (selectedOption, onOptionSelected) = remember { mutableStateOf(platformName) }
+        Column(
+            modifier = Modifier.selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            platform.forEach { text ->
+                Row(
+                    Modifier.selectable(
+                        selected = (text == selectedOption),
+                        onClick = {
+                            onOptionSelected(text)
+                            platformCode.value = Data().platformCode(text)
+                        },
+                        role = Role.RadioButton
+                    )
+                ) {
+                    RadioButton(
+                        selected = (text == selectedOption),
+                        onClick = null
+                    )
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CornerView(
+    cornerState: List<String>,
+    cornerStateCode: MutableState<String>
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.corner)
+        )
+        val cornerStateName = Preferences().perfGet("corner")?.let { Data().cornerStateName(it) }
+        val (selectedOption, onOptionSelected) = remember { mutableStateOf(cornerStateName) }
+        Column(
+            modifier = Modifier.selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            cornerState.forEach { text ->
+                Row(
+                    Modifier
+                        .selectable(
+                            selected = (text == selectedOption),
+                            onClick = {
+                                onOptionSelected(text)
+                                cornerStateCode.value = Data().cornerStateCode(text)
+                            },
+                            role = Role.RadioButton
+                        )
+                ) {
+                    RadioButton(
+                        selected = (text == selectedOption),
+                        onClick = null
+                    )
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ResolutionView(
+    resolution: List<String>,
+    resolutionCode: MutableState<String>
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.resolution)
+        )
+        val resolutionName = Preferences().perfGet("resolution")?.let { Data().resolutionName(it) }
+        val (selectedOption, onOptionSelected) = remember { mutableStateOf(resolutionName) }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            resolution.forEach { text ->
+                Row(
+                    modifier = Modifier
+                        .selectable(
+                            selected = (text == selectedOption),
+                            onClick = {
+                                onOptionSelected(text)
+                                resolutionCode.value = Data().resolutionCode(text)
+                                Preferences().perfSet("resolution", resolutionCode.value)
+                            },
+                            role = Role.RadioButton
+                        )
+                ) {
+                    RadioButton(
+                        selected = (text == selectedOption),
+                        onClick = null
+                    )
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ResultsView(results: List<Response.Result>, resolution: String, corner: String) {
+    Column {
+        results.forEach {
+            ResultItemView(it, resolution, corner)
+        }
+    }
+}
+
+@Composable
+fun ResultItemView(result: Response.Result, resolution: String, corner: String) {
+    val isVisible = remember { mutableStateOf(false) }
+    AnimatedVisibility(
+        visible = isVisible.value,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
+    ) {
+        Card(
+            modifier = Modifier.padding(bottom = 16.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    modifier = Modifier.size(50.dp),
+                    bitmap = networkImage(url = result.artworkUrl512, corner = corner),
+                    contentDescription = null
+                )
+                Column(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .weight(1f)
+                ) {
+                    MessageText(
+                        text = result.trackName,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    MessageText(
+                        text = result.primaryGenreName,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    MessageText(
+                        text = result.artistName,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                val coroutineScope = rememberCoroutineScope()
+                val context = LocalContext.current
+                Text(
+                    modifier = Modifier
+                        .padding(start = 16.dp)
+                        .clickable {
+                            coroutineScope.launch {
+                                Download().downloadImage(
+                                    context,
+                                    result.artworkUrl512,
+                                    result.trackName,
+                                    resolution,
+                                    corner
+                                )
+                            }
+                        },
+                    fontWeight = FontWeight.Bold,
+                    text = stringResource(R.string.download),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+    LaunchedEffect(result) {
+        isVisible.value = false
+        delay(300)
+        isVisible.value = true
+    }
+
+}
+
+@Composable
+fun MessageText(text: String, style: TextStyle) {
+    val scrollState = rememberScrollState()
+    Text(
+        text = text,
+        style = style,
+        modifier = Modifier.horizontalScroll(scrollState),
+        maxLines = 1
+    )
+}
+
+@Composable
+fun networkImage(url: String, corner: String): ImageBitmap {
+    val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)) }
+    val coroutineScope = rememberCoroutineScope()
+
+    bitmapState.value = LoadIcon().roundCorners(bitmapState.value, corner)
+
+    LaunchedEffect(url, corner) {
+        coroutineScope.launch { bitmapState.value = LoadIcon().loadIcon(url) }
+    }
+
+    return bitmapState.value.asImageBitmap()
 }

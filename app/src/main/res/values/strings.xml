@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">HQ ICON</string>
-    <string name="app_version">%1$s(%2$s)</string>
+    <string name="app_name" translatable="false">HQ ICON</string>
+    <string name="app_version" translatable="false">%1$s(%2$s)</string>
     <string name="submit">Submit</string>
     <string name="appName">App Name</string>
     <string name="country">Country / Region</string>
@@ -9,4 +9,7 @@
     <string name="resolution">Resolution:</string>
     <string name="view_source">": View Source"</string>
     <string name="join_group">": Join Group"</string>
+    <string name="download">Download</string>
+    <string name="download_successful">Download successful</string>
+    <string name="download_failed">Download failed</string>
 </resources>

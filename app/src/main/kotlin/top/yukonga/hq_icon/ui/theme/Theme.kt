@@ -1,4 +1,4 @@
-package top.yukonga.hqicon.ui.theme
+package top.yukonga.hq_icon.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -21,9 +21,9 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = Color(0xFF0D84FF),
-    primaryContainer = Color.White,
+    primaryContainer = Color(0xFFF5F5F5),
     onPrimaryContainer = Color.Black,
-    background = Color(0xFFF5F5F5),
+    background = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
@@ -32,7 +32,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun HQICONTheme(
+fun HqIconTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
