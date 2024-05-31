@@ -647,7 +647,7 @@ fun ResultItemView(result: Response.Result, resolution: String, corner: String) 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier.size(58.dp),
                     bitmap = networkImage(url = result.artworkUrl512, corner = corner),
                     contentDescription = null
                 )
