@@ -3,7 +3,6 @@ package top.yukonga.hq_icon
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -135,10 +134,6 @@ fun App() {
         animationSpec = tween(durationMillis = 300),
         label = ""
     )
-
-    Log.d("heightOffset", scrollBehavior.state.heightOffset.toString())
-    Log.d("contentOffset", scrollBehavior.state.contentOffset.toString())
-    Log.d("heightOffsetLimit", scrollBehavior.state.heightOffsetLimit.toString())
 
     val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
     val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
