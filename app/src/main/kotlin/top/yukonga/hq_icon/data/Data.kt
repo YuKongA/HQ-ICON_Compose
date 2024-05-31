@@ -55,4 +55,6 @@ class Data {
         val cornerState = cornerStateList.find { it.cornerStateCode == cornerStateCode } ?: return ""
         return cornerState.cornerStateName
     }
+
+    val country = listOf("CN", "US", "JP", "KR")
 }

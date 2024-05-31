@@ -29,7 +29,6 @@ class LoadIcon {
         val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(output)
 
-        Log.d("corner", corner)
         val paint = Paint().apply {
             isAntiAlias = true
             shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)

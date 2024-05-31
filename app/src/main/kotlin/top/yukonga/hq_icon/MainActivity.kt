@@ -3,6 +3,7 @@ package top.yukonga.hq_icon
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,12 +34,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.ImageSearch
@@ -128,13 +129,16 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun App() {
-    val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val fabOffsetHeight by animateDpAsState(
-        targetValue = if (scrollState.value > 0) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
+        targetValue = if (scrollBehavior.state.contentOffset < 0) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
         animationSpec = tween(durationMillis = 300),
         label = ""
     )
+
+    Log.d("heightOffset", scrollBehavior.state.heightOffset.toString())
+    Log.d("contentOffset", scrollBehavior.state.contentOffset.toString())
+    Log.d("heightOffsetLimit", scrollBehavior.state.heightOffsetLimit.toString())
 
     val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
     val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
@@ -142,7 +146,7 @@ fun App() {
     val resolutionCode = remember { mutableStateOf(Preferences().perfGet("resolution") ?: "512") }
     val cornerStateCode = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
     val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
-    val limit = remember { mutableIntStateOf(5) }
+    val limit = remember { mutableIntStateOf(15) }
     val resultsState: MutableState<List<Response.Result>> = remember { mutableStateOf(emptyList()) }
 
     HqIconTheme {
@@ -154,17 +158,17 @@ fun App() {
             floatingActionButton = { FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, resultsState, cornerStateCode, cornerState) },
             floatingActionButtonPosition = FabPosition.End
         ) { padding ->
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .padding(top = padding.calculateTopPadding())
                     .padding(horizontal = 20.dp)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-
             ) {
-                MainCardView(appName, country)
-                SecondView(Data().platformNames, Data().resolutionNames, Data().cornerStateNames, platformCode, resolutionCode, cornerStateCode)
-                ResultsView(resultsState.value, resolutionCode.value, cornerState.value)
+                item {
+                    MainCardView(appName, country)
+                    SecondView(Data().platformNames, Data().resolutionNames, Data().cornerStateNames, platformCode, resolutionCode, cornerStateCode)
+                    ResultsView(resultsState.value, resolutionCode.value, cornerStateCode.value)
+                    Spacer(modifier = Modifier.padding(bottom = padding.calculateBottomPadding()))
+                }
             }
         }
     }
@@ -254,6 +258,10 @@ fun AboutDialog() {
                             .padding(top = 88.dp)
                     ) {
                         Row {
+                            Text(
+                                text = stringResource(R.string.view_source) + " ",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                             ClickableText(
                                 text = AnnotatedString(
                                     text = "GitHub",
@@ -262,12 +270,12 @@ fun AboutDialog() {
                                 onClick = { uriHandler.openUri("https://github.com/YuKongA/HQ-ICON_Compose") },
                                 style = MaterialTheme.typography.bodyMedium + SpanStyle(color = MaterialTheme.colorScheme.primary)
                             )
-                            Text(
-                                text = stringResource(R.string.view_source),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                         Row {
+                            Text(
+                                text = stringResource(R.string.join_group) + " ",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                             ClickableText(
                                 text = AnnotatedString(
                                     text = "Telegram",
@@ -275,10 +283,6 @@ fun AboutDialog() {
                                 ),
                                 onClick = { uriHandler.openUri("https://t.me/YuKongA13579") },
                                 style = MaterialTheme.typography.bodyMedium + SpanStyle(color = MaterialTheme.colorScheme.primary)
-                            )
-                            Text(
-                                text = stringResource(R.string.join_group),
-                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -359,6 +363,7 @@ fun AppNameView(
         onValueChange = { appName.value = it },
         label = { Text(stringResource(R.string.appName)) },
         shape = RoundedCornerShape(10.dp),
+        maxLines = 1,
         leadingIcon = { Icon(imageVector = Icons.Outlined.ImageSearch, null) },
     )
 }
@@ -369,7 +374,7 @@ fun CountryView(
 ) {
     TextFieldWithDropdown(
         text = country,
-        items = listOf("CN", "US", "JP", "KR"),
+        items = Data().country,
         label = stringResource(R.string.country),
         leadingIcon = Icons.Outlined.TravelExplore,
     )
@@ -433,7 +438,9 @@ fun SecondView(
     cornerStateCode: MutableState<String>
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Card(
@@ -467,7 +474,9 @@ fun SecondView(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp)
     ) {
         ResolutionView(resolution, resolutionCode)
     }
@@ -485,7 +494,7 @@ fun PlatformView(
         Text(
             text = stringResource(R.string.platform)
         )
-        val platformName = Preferences().perfGet("platform")?.let { Data().platformName(it) }
+        val platformName = Preferences().perfGet("platform")?.let { Data().platformName(it) } ?: platform[0]
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(platformName) }
         Column(
             modifier = Modifier.selectableGroup(),
@@ -529,7 +538,7 @@ fun CornerView(
         Text(
             text = stringResource(R.string.corner)
         )
-        val cornerStateName = Preferences().perfGet("corner")?.let { Data().cornerStateName(it) }
+        val cornerStateName = Preferences().perfGet("corner")?.let { Data().cornerStateName(it) } ?: cornerState[0]
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(cornerStateName) }
         Column(
             modifier = Modifier.selectableGroup(),
@@ -574,7 +583,7 @@ fun ResolutionView(
         Text(
             text = stringResource(R.string.resolution)
         )
-        val resolutionName = Preferences().perfGet("resolution")?.let { Data().resolutionName(it) }
+        val resolutionName = Preferences().perfGet("resolution")?.let { Data().resolutionName(it) } ?: resolution[0]
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(resolutionName) }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -611,8 +620,8 @@ fun ResolutionView(
 @Composable
 fun ResultsView(results: List<Response.Result>, resolution: String, corner: String) {
     Column {
-        results.forEach {
-            ResultItemView(it, resolution, corner)
+        results.forEach { result ->
+            ResultItemView(result, resolution, corner)
         }
     }
 }
@@ -626,7 +635,7 @@ fun ResultItemView(result: Response.Result, resolution: String, corner: String) 
         exit = fadeOut() + shrinkVertically()
     ) {
         Card(
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = 20.dp),
             shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -689,7 +698,6 @@ fun ResultItemView(result: Response.Result, resolution: String, corner: String) 
         delay(300)
         isVisible.value = true
     }
-
 }
 
 @Composable
@@ -708,11 +716,11 @@ fun networkImage(url: String, corner: String): ImageBitmap {
     val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)) }
     val coroutineScope = rememberCoroutineScope()
 
-    bitmapState.value = LoadIcon().roundCorners(bitmapState.value, corner)
-
     LaunchedEffect(url, corner) {
-        coroutineScope.launch { bitmapState.value = LoadIcon().loadIcon(url) }
+        coroutineScope.launch {
+            bitmapState.value = LoadIcon().loadIcon(url)
+            bitmapState.value = LoadIcon().roundCorners(bitmapState.value, corner)
+        }
     }
-
     return bitmapState.value.asImageBitmap()
 }
