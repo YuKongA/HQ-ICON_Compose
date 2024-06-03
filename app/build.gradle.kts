@@ -56,7 +56,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            isShrinkResources = true
+            proguardFiles("proguard-rules.pro")
             signingConfig = signingConfigs.getByName(if (keystorePath != null) "github" else "release")
         }
         debug {
@@ -74,7 +75,8 @@ android {
             freeCompilerArgs = listOf(
                 "-Xno-param-assertions",
                 "-Xno-call-assertions",
-                "-Xno-receiver-assertions"
+                "-Xno-receiver-assertions",
+                "-language-version=2.0"
             )
         }
     }
