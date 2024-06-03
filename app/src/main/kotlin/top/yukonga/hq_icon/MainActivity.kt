@@ -110,8 +110,8 @@ fun App() {
             ) {
                 item {
                     MainCardView(appName, country)
-                    SecondCardView(platformCode, resolutionCode, cornerStateCode)
-                    ResultsView(resultsState.value, resolutionCode.value, cornerStateCode.value)
+                    SecondCardView(platformCode, cornerStateCode, resolutionCode)
+                    ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
                     Spacer(modifier = Modifier.padding(bottom = padding.calculateBottomPadding()))
                 }
             }

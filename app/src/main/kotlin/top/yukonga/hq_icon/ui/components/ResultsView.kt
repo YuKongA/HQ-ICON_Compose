@@ -41,19 +41,17 @@ import top.yukonga.hq_icon.data.Response
 import top.yukonga.hq_icon.utils.Download
 import top.yukonga.hq_icon.utils.LoadIcon
 
-
 @Composable
-fun ResultsView(results: List<Response.Result>, resolution: String, corner: String) {
+fun ResultsView(results: List<Response.Result>, corner: String, resolution: String) {
     Column {
         results.forEach { result ->
-            ResultItemView(result, resolution, corner)
+            ResultItemView(result, corner, resolution)
         }
     }
 }
 
-
 @Composable
-fun ResultItemView(result: Response.Result, resolution: String, corner: String) {
+fun ResultItemView(result: Response.Result, corner: String, resolution: String) {
     val isVisible = remember { mutableStateOf(false) }
     AnimatedVisibility(
         visible = isVisible.value,
@@ -74,7 +72,7 @@ fun ResultItemView(result: Response.Result, resolution: String, corner: String) 
             ) {
                 Image(
                     modifier = Modifier.size(58.dp),
-                    bitmap = NetworkImage(url = result.artworkUrl512, corner = corner),
+                    bitmap = networkImage(url = result.artworkUrl512, corner = corner),
                     contentDescription = null
                 )
                 Column(
@@ -138,7 +136,7 @@ fun MessageText(text: String, style: TextStyle) {
 }
 
 @Composable
-fun NetworkImage(url: String, corner: String): ImageBitmap {
+fun networkImage(url: String, corner: String): ImageBitmap {
     val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)) }
     val coroutineScope = rememberCoroutineScope()
 

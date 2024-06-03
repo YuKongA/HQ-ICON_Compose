@@ -31,9 +31,9 @@ class Download {
         try {
             saveImageToStorage(context, finallyBitmap, realFileName)
             CoroutineScope(Dispatchers.Main).launch {
-                Toast.makeText(context, context.getString(R.string.download_successful), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.download_successful) + ": Pictures/HQ ICON/$realFileName", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: Nothing) {
+        } catch (e: Exception) {
             CoroutineScope(Dispatchers.Main).launch {
                 Toast.makeText(context, context.getString(R.string.download_failed), Toast.LENGTH_SHORT).show()
             }

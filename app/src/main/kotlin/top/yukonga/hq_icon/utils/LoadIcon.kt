@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Shader
-import android.util.Log
 import androidx.core.graphics.PathParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
