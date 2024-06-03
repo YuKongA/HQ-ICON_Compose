@@ -1,5 +1,4 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.ByteArrayOutputStream
 import java.util.Properties
 
@@ -65,13 +64,14 @@ android {
             applicationIdSuffix = ".debug"
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
     kotlin {
+        jvmToolchain(21)
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_17
             freeCompilerArgs = listOf(
                 "-Xno-param-assertions",
                 "-Xno-call-assertions",
