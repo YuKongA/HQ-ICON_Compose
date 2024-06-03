@@ -9,11 +9,10 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HQICON">
+        android:theme="@style/Theme.Hq_Icon">
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.HQICON">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

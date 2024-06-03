@@ -1,18 +1,22 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
+@Suppress("UnstableApiUsage")
 android {
     namespace = "top.yukonga.hq_icon"
     compileSdk = 34
-
+    androidResources {
+        generateLocaleConfig = true
+    }
     defaultConfig {
         applicationId = namespace
         minSdk = 26
@@ -52,11 +56,8 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-            )
-            signingConfig =
-                signingConfigs.getByName(if (keystorePath != null) "github" else "release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName(if (keystorePath != null) "github" else "release")
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
@@ -67,17 +68,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs = listOf(
-            "-Xno-param-assertions",
-            "-Xno-call-assertions",
-            "-Xno-receiver-assertions"
-        )
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+            freeCompilerArgs = listOf(
+                "-Xno-param-assertions",
+                "-Xno-call-assertions",
+                "-Xno-receiver-assertions"
+            )
+        }
     }
     buildFeatures {
-        compose = true
         buildConfig = true
+        compose = true
     }
     packaging {
         resources {
@@ -85,10 +88,13 @@ android {
         }
         applicationVariants.all {
             outputs.all {
-                (this as BaseVariantOutputImpl).outputFileName =
-                    "HQ_ICON-$versionName($versionCode)-$name.apk"
+                (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-$versionName($versionCode)-$name.apk"
             }
         }
+    }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 }
 
@@ -122,14 +128,16 @@ fun getVersionName(): String {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.material.icons.extended.android)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.material.icons.extended.android)
-    implementation(libs.androidx.foundation.layout.android)
+
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
+
     debugImplementation(libs.androidx.ui.tooling)
 }
