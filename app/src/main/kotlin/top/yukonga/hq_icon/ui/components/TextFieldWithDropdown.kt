@@ -1,5 +1,6 @@
 package top.yukonga.hq_icon.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,9 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,11 +33,15 @@ fun TextFieldWithDropdown(
     label: String,
     leadingIcon: ImageVector
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = isDropdownExpanded,
-        onExpandedChange = { isDropdownExpanded = it },
+        onExpandedChange = {
+            isDropdownExpanded = it
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        },
     ) {
         OutlinedTextField(
             value = text.value,
@@ -42,27 +49,24 @@ fun TextFieldWithDropdown(
             label = { Text(label) },
             readOnly = true,
             singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(),
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropdownExpanded) },
             leadingIcon = { Icon(imageVector = leadingIcon, null) },
         )
         DropdownMenu(
-            modifier = Modifier
-                .exposedDropdownSize()
-                .heightIn(max = 250.dp),
+            modifier = Modifier.exposedDropdownSize().heightIn(max = 250.dp),
             expanded = isDropdownExpanded,
             onDismissRequest = { isDropdownExpanded = false },
         ) {
             items.forEach { item ->
-                DropdownMenuItem(
+                DropdownMenuItem(modifier = Modifier.background(Color.Transparent),
                     text = { Text(item) },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     onClick = {
                         text.value = item
                         isDropdownExpanded = false
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                     }
                 )
             }

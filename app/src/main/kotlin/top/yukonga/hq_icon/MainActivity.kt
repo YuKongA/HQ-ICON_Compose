@@ -40,7 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -154,9 +156,12 @@ private fun FloatActionButton(
     cornerState: MutableState<String>
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val hapticFeedback = LocalHapticFeedback.current
+
     ExtendedFloatingActionButton(
         modifier = Modifier.offset(y = fabOffsetHeight),
         onClick = {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             coroutineScope.launch {
                 if (term.value != "") {
                     val results = Search().search(term.value, country.value, platform.value, limit.value)
@@ -177,7 +182,6 @@ private fun FloatActionButton(
             modifier = Modifier.height(20.dp),
             imageVector = Icons.Filled.Check,
             contentDescription = null
-
         )
         Spacer(
             modifier = Modifier.width(8.dp)

@@ -18,6 +18,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -81,6 +83,7 @@ fun PlatformView(
     platformCode: MutableState<String>
 ) {
     val platform = Data().platformNames
+    val hapticFeedback = LocalHapticFeedback.current
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -101,6 +104,7 @@ fun PlatformView(
                         selected = (text == selectedOption),
                         onClick = {
                             onOptionSelected(text)
+                            hapticFeedback.performHapticFeedback(LongPress)
                             platformCode.value = Data().platformCode(text)
                         },
                         role = Role.RadioButton
@@ -126,6 +130,7 @@ fun CornerView(
     cornerStateCode: MutableState<String>
 ) {
     val cornerState = Data().cornerStateNames
+    val hapticFeedback = LocalHapticFeedback.current
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -147,6 +152,7 @@ fun CornerView(
                             selected = (text == selectedOption),
                             onClick = {
                                 onOptionSelected(text)
+                                hapticFeedback.performHapticFeedback(LongPress)
                                 cornerStateCode.value = Data().cornerStateCode(text)
                             },
                             role = Role.RadioButton
@@ -172,6 +178,7 @@ fun ResolutionView(
     resolutionCode: MutableState<String>
 ) {
     val resolution = Data().resolutionNames
+    val hapticFeedback = LocalHapticFeedback.current
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -193,6 +200,7 @@ fun ResolutionView(
                             selected = (text == selectedOption),
                             onClick = {
                                 onOptionSelected(text)
+                                hapticFeedback.performHapticFeedback(LongPress)
                                 resolutionCode.value = Data().resolutionCode(text)
                                 Preferences().perfSet("resolution", resolutionCode.value)
                             },

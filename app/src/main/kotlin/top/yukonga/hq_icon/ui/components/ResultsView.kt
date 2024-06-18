@@ -29,7 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +55,10 @@ fun ResultsView(results: List<Response.Result>, corner: String, resolution: Stri
 @Composable
 fun ResultItemView(result: Response.Result, corner: String, resolution: String) {
     val isVisible = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val hapticFeedback = LocalHapticFeedback.current
+
     AnimatedVisibility(
         visible = isVisible.value,
         enter = fadeIn() + expandVertically(),
@@ -93,12 +99,11 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
-                val coroutineScope = rememberCoroutineScope()
-                val context = LocalContext.current
                 Text(
                     modifier = Modifier
                         .padding(start = 16.dp)
                         .clickable {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
                                 Download().downloadImage(
                                     context,
@@ -127,6 +132,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
 @Composable
 fun MessageText(text: String, style: TextStyle) {
     val scrollState = rememberScrollState()
+
     Text(
         text = text,
         style = style,
