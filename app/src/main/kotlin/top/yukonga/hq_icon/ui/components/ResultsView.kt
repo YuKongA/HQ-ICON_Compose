@@ -9,14 +9,17 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.hq_icon.R
@@ -52,9 +56,11 @@ fun ResultsView(results: List<Response.Result>, corner: String, resolution: Stri
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultItemView(result: Response.Result, corner: String, resolution: String) {
     val isVisible = remember { mutableStateOf(false) }
+    val isDialogOpen = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
@@ -65,7 +71,8 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
         exit = fadeOut() + shrinkVertically()
     ) {
         Card(
-            modifier = Modifier.padding(bottom = 20.dp),
+            modifier = Modifier
+                .padding(bottom = 20.dp),
             shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -73,12 +80,19 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
             )
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    modifier = Modifier.size(58.dp),
-                    bitmap = networkImage(url = result.artworkUrl512, corner = corner),
+                    modifier = Modifier
+                        .size(58.dp)
+                        .clickable { isDialogOpen.value = true },
+                    bitmap = networkImage(
+                        url = result.artworkUrl512,
+                        corner = corner,
+                        resolution = resolution.toInt()
+                    ),
                     contentDescription = null
                 )
                 Column(
@@ -122,6 +136,28 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
             }
         }
     }
+
+    if (isDialogOpen.value) {
+        BasicAlertDialog(
+            onDismissRequest = { isDialogOpen.value = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            content = {
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        bitmap = networkImage(
+                            url = result.artworkUrl512,
+                            corner = corner,
+                            resolution = resolution.toInt()
+                        ),
+                        contentDescription = null
+                    )
+                }
+            }
+        )
+    }
+
     LaunchedEffect(result) {
         isVisible.value = false
         delay(300)
@@ -142,13 +178,14 @@ fun MessageText(text: String, style: TextStyle) {
 }
 
 @Composable
-fun networkImage(url: String, corner: String): ImageBitmap {
-    val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888)) }
+fun networkImage(url: String, corner: String, resolution: Int): ImageBitmap {
+    val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(resolution, resolution, Bitmap.Config.ARGB_8888)) }
+    val realUrl = url.replace("512x512bb.jpg", "${resolution}x${resolution}bb.png")
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(url, corner) {
         coroutineScope.launch {
-            bitmapState.value = LoadIcon().loadIcon(url)
+            bitmapState.value = LoadIcon().loadIcon(realUrl)
             bitmapState.value = LoadIcon().roundCorners(bitmapState.value, corner)
         }
     }

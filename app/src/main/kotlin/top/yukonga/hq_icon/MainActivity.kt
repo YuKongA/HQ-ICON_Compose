@@ -2,6 +2,7 @@ package top.yukonga.hq_icon
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -82,7 +83,7 @@ class MainActivity : ComponentActivity() {
 fun App() {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val fabOffsetHeight by animateDpAsState(
-        targetValue = if (scrollBehavior.state.contentOffset < 0) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
+        targetValue = if (scrollBehavior.state.contentOffset < -35) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
         animationSpec = tween(durationMillis = 300),
         label = ""
     )
@@ -157,10 +158,12 @@ private fun FloatActionButton(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
+    val searching = stringResource(R.string.searching)
 
     ExtendedFloatingActionButton(
         modifier = Modifier.offset(y = fabOffsetHeight),
         onClick = {
+            Toast.makeText(AppContext.context, searching, Toast.LENGTH_SHORT).show()
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             coroutineScope.launch {
                 if (term.value != "") {

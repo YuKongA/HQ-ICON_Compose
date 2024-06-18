@@ -11,4 +11,5 @@
     <string name="download">下載</string>
     <string name="download_successful">下載成功</string>
     <string name="download_failed">下載失敗</string>
+    <string name="searching">開始搜索…</string>
 </resources>

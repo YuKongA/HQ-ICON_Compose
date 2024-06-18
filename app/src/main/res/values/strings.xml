@@ -12,4 +12,5 @@
     <string name="download">Download</string>
     <string name="download_successful">Download successful</string>
     <string name="download_failed">Download failed</string>
+    <string name="searching">Searching…</string>
 </resources>
