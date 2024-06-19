@@ -12,14 +12,14 @@ plugins {
 @Suppress("UnstableApiUsage")
 android {
     namespace = "top.yukonga.hq_icon"
-    compileSdk = 34
+    compileSdk = 35
     androidResources {
         generateLocaleConfig = true
     }
     defaultConfig {
         applicationId = namespace
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = getVersionCode()
         versionName = "1.0" + "-" + getVersionName()
 
