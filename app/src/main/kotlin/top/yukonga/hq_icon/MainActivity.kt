@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -38,7 +39,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,8 +53,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -65,6 +66,7 @@ import top.yukonga.hq_icon.utils.AppContext
 import top.yukonga.hq_icon.utils.Preferences
 import top.yukonga.hq_icon.utils.Search
 import top.yukonga.hq_icon.utils.Utils
+import top.yukonga.hq_icon.viewModel.ResultsViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -76,21 +78,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
 
+        val resultsViewModel: ResultsViewModel by viewModels()
+
         setContent {
-            App()
+            App(resultsViewModel)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun App() {
+fun App(resultsViewModel: ResultsViewModel) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val fabOffsetHeight by animateDpAsState(
         targetValue = if (scrollBehavior.state.contentOffset < -35) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
-        animationSpec = tween(durationMillis = 300),
-        label = ""
+        animationSpec = tween(durationMillis = 300), label = ""
     )
 
     val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
@@ -100,7 +102,15 @@ fun App() {
     val cornerStateCode = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
     val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
     val limit = remember { mutableIntStateOf(15) }
-    val resultsState: MutableState<List<Response.Result>> = remember { mutableStateOf(emptyList()) }
+
+    val results by resultsViewModel.results.collectAsState()
+    val corner by resultsViewModel.corner.collectAsState()
+    val resolution by resultsViewModel.resolution.collectAsState()
+
+    LaunchedEffect(cornerStateCode.value, resolutionCode.value) {
+        resultsViewModel.updateCorner(cornerStateCode.value)
+        resultsViewModel.updateResolution(resolutionCode.value)
+    }
 
     HqIconTheme {
         Scaffold(
@@ -113,7 +123,7 @@ fun App() {
                 TopAppBar(scrollBehavior)
             },
             floatingActionButton = {
-                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, resultsState, cornerStateCode, cornerState)
+                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
             },
             floatingActionButtonPosition = FabPosition.End
         ) { padding ->
@@ -128,7 +138,7 @@ fun App() {
                             Column {
                                 MainCardView(appName, country)
                                 SecondCardView(platformCode, cornerStateCode, resolutionCode)
-                                ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
+                                ResultsView(results, corner, resolution)
                                 Spacer(Modifier.height(padding.calculateBottomPadding()))
                             }
                         } else {
@@ -145,7 +155,7 @@ fun App() {
                                         Spacer(modifier = Modifier.height(20.dp))
                                     }
                                     Column(modifier = Modifier.weight(1.0f)) {
-                                        ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
+                                        ResultsView(results, corner, resolution)
                                     }
                                 }
                                 Spacer(Modifier.height(padding.calculateBottomPadding()))
@@ -165,8 +175,7 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
         title = {
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleLarge
             )
         },
         actions = { AboutDialog() },
@@ -188,9 +197,8 @@ private fun FloatActionButton(
     country: MutableState<String>,
     platform: MutableState<String>,
     limit: MutableState<Int>,
-    resultsState: MutableState<List<Response.Result>>,
-    cornerStateCode: MutableState<String>,
-    cornerState: MutableState<String>
+    cornerState: MutableState<String>,
+    resultsViewModel: ResultsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
@@ -205,8 +213,8 @@ private fun FloatActionButton(
                 if (term.value != "") {
                     val results = Search().search(term.value, country.value, platform.value, limit.value)
                     val response = Utils().json.decodeFromString<Response.Root>(results)
-                    cornerState.value = cornerStateCode.value
-                    resultsState.value = response.results
+                    resultsViewModel.updateResults(response.results)
+
                     Preferences().perfSet("appName", term.value)
                     Preferences().perfSet("country", country.value)
                     Preferences().perfSet("platform", platform.value)
