@@ -13,9 +13,7 @@ plugins {
 android {
     namespace = "top.yukonga.hq_icon"
     compileSdk = 35
-    androidResources {
-        generateLocaleConfig = true
-    }
+
     defaultConfig {
         applicationId = namespace
         minSdk = 26
@@ -23,9 +21,7 @@ android {
         versionCode = getVersionCode()
         versionName = "1.0" + "-" + getVersionName()
 
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables.useSupportLibrary = true
     }
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
@@ -64,40 +60,23 @@ android {
             applicationIdSuffix = ".debug"
         }
     }
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-    }
-    kotlin {
-        jvmToolchain(21)
-        compilerOptions {
-            freeCompilerArgs = listOf(
-                "-Xno-param-assertions",
-                "-Xno-call-assertions",
-                "-Xno-receiver-assertions",
-                "-language-version=2.0"
-            )
-        }
-    }
+    androidResources.generateLocaleConfig = true
     buildFeatures {
         buildConfig = true
         compose = true
     }
+    dependenciesInfo.includeInApk = false
+    java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+    kotlin.jvmToolchain(21)
     packaging {
-        resources {
-            excludes += "**"
-        }
         applicationVariants.all {
             outputs.all {
                 (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-$versionName($versionCode)-$name.apk"
             }
         }
+        resources.excludes += "**"
     }
-    dependenciesInfo {
-        includeInApk = false
-        includeInBundle = false
-    }
+
 }
 
 fun getGitCommitCount(): Int {
