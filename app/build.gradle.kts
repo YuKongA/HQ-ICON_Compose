@@ -19,7 +19,7 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = getVersionCode()
-        versionName = "1.0" + "-" + getVersionName()
+        versionName = "1.1.0"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -52,6 +52,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            vcsInfo.include = false
             proguardFiles("proguard-rules.pro")
             signingConfig = signingConfigs.getByName(if (keystorePath != null) "github" else "release")
         }
@@ -71,7 +72,7 @@ android {
     packaging {
         applicationVariants.all {
             outputs.all {
-                (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-$versionName($versionCode)-$name.apk"
+                (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-v$versionName($versionCode)-$name.apk"
             }
         }
         resources.excludes += "**"
@@ -88,22 +89,9 @@ fun getGitCommitCount(): Int {
     return out.toString().trim().toInt()
 }
 
-fun getGitDescribe(): String {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "describe", "--always")
-        standardOutput = out
-    }
-    return out.toString().trim()
-}
-
 fun getVersionCode(): Int {
     val commitCount = getGitCommitCount()
     return commitCount
-}
-
-fun getVersionName(): String {
-    return getGitDescribe()
 }
 
 dependencies {
