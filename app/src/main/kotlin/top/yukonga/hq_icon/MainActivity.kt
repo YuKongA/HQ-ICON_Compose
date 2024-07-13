@@ -8,9 +8,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -20,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
@@ -27,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -101,9 +106,15 @@ fun App() {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = { TopAppBar(scrollBehavior) },
-            floatingActionButton = { FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, resultsState, cornerStateCode, cornerState) },
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .background(MaterialTheme.colorScheme.background)
+                .displayCutoutPadding(),
+            topBar = {
+                TopAppBar(scrollBehavior)
+            },
+            floatingActionButton = {
+                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, resultsState, cornerStateCode, cornerState)
+            },
             floatingActionButtonPosition = FabPosition.End
         ) { padding ->
             LazyColumn(
@@ -112,10 +123,35 @@ fun App() {
                     .padding(horizontal = 20.dp)
             ) {
                 item {
-                    MainCardView(appName, country)
-                    SecondCardView(platformCode, cornerStateCode, resolutionCode)
-                    ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
-                    Spacer(modifier = Modifier.padding(bottom = padding.calculateBottomPadding()))
+                    BoxWithConstraints {
+                        if (maxWidth < 768.dp) {
+                            Column {
+                                MainCardView(appName, country)
+                                SecondCardView(platformCode, cornerStateCode, resolutionCode)
+                                ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
+                                Spacer(Modifier.height(padding.calculateBottomPadding()))
+                            }
+                        } else {
+                            Column {
+                                Row {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(0.8f)
+                                            .padding(end = 20.dp)
+                                    ) {
+                                        MainCardView(appName, country)
+                                        Spacer(modifier = Modifier.height(20.dp))
+                                        SecondCardView(platformCode, cornerStateCode, resolutionCode)
+                                        Spacer(modifier = Modifier.height(20.dp))
+                                    }
+                                    Column(modifier = Modifier.weight(1.0f)) {
+                                        ResultsView(resultsState.value, cornerStateCode.value, resolutionCode.value)
+                                    }
+                                }
+                                Spacer(Modifier.height(padding.calculateBottomPadding()))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -125,7 +161,7 @@ fun App() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
         title = {
             Text(
                 text = stringResource(R.string.app_name),

@@ -2,6 +2,7 @@ package top.yukonga.hq_icon.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material3.BasicAlertDialog
@@ -91,14 +91,12 @@ fun AboutDialog() {
                         ) {
                             Text(
                                 text = stringResource(R.string.app_name),
-                                modifier = Modifier,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = MaterialTheme.typography.titleLarge.fontSize
                             )
                             Text(
                                 text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE.toString()),
-                                modifier = Modifier,
-                                style = MaterialTheme.typography.bodyMedium
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize
                             )
                         }
                     }
@@ -112,33 +110,37 @@ fun AboutDialog() {
                                 text = stringResource(R.string.view_source) + " ",
                                 style = MaterialTheme.typography.bodyMedium
                             )
-                            ClickableText(
+                            Text(
                                 text = AnnotatedString(
                                     text = "GitHub",
-                                    spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+                                    spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.primary)
                                 ),
-                                onClick = {
-                                    uriHandler.openUri("https://github.com/YuKongA/HQ-ICON_Compose")
-                                    hapticFeedback.performHapticFeedback(LongPress)
-                                },
-                                style = MaterialTheme.typography.bodyMedium + SpanStyle(color = MaterialTheme.colorScheme.primary)
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                modifier = Modifier.clickable(
+                                    onClick = {
+                                        uriHandler.openUri("https://github.com/YuKongA/HQ-ICON_Compose")
+                                        hapticFeedback.performHapticFeedback(LongPress)
+                                    }
+                                )
                             )
                         }
                         Row {
                             Text(
                                 text = stringResource(R.string.join_group) + " ",
-                                style = MaterialTheme.typography.bodyMedium
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize
                             )
-                            ClickableText(
+                            Text(
                                 text = AnnotatedString(
                                     text = "Telegram",
-                                    spanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+                                    spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.primary)
                                 ),
-                                onClick = {
-                                    uriHandler.openUri("https://t.me/YuKongA13579")
-                                    hapticFeedback.performHapticFeedback(LongPress)
-                                },
-                                style = MaterialTheme.typography.bodyMedium + SpanStyle(color = MaterialTheme.colorScheme.primary)
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                modifier = Modifier.clickable(
+                                    onClick = {
+                                        uriHandler.openUri("https://t.me/YuKongA13579")
+                                        hapticFeedback.performHapticFeedback(LongPress)
+                                    }
+                                )
                             )
                         }
                     }

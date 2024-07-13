@@ -4,12 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType.Companion.PrimaryNotEditable
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,8 +34,9 @@ fun TextFieldWithDropdown(
     label: String,
     leadingIcon: ImageVector
 ) {
-    val hapticFeedback = LocalHapticFeedback.current
     var isDropdownExpanded by remember { mutableStateOf(false) }
+
+    val hapticFeedback = LocalHapticFeedback.current
 
     ExposedDropdownMenuBox(
         expanded = isDropdownExpanded,
@@ -49,13 +51,19 @@ fun TextFieldWithDropdown(
             label = { Text(label) },
             readOnly = true,
             singleLine = true,
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .menuAnchor(type = PrimaryNotEditable, enabled = true)
+                .fillMaxWidth(),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(isDropdownExpanded) },
             leadingIcon = { Icon(imageVector = leadingIcon, null) },
         )
-        DropdownMenu(
-            modifier = Modifier.exposedDropdownSize().heightIn(max = 250.dp),
+        ExposedDropdownMenu(
+            modifier = Modifier
+                .exposedDropdownSize()
+                .heightIn(max = 250.dp),
+            shape = RoundedCornerShape(10.dp),
+            containerColor = MaterialTheme.colorScheme.background,
             expanded = isDropdownExpanded,
             onDismissRequest = { isDropdownExpanded = false },
         ) {

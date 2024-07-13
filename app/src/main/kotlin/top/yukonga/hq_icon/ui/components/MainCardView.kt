@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Data
 
-
 @Composable
 fun MainCardView(
     appName: MutableState<String>,
