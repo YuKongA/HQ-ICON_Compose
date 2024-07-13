@@ -30,7 +30,7 @@ import top.yukonga.hq_icon.utils.Preferences
 @Composable
 fun SecondCardView(
     platformCode: MutableState<String>,
-    cornerStateCode: MutableState<String>,
+    cornerCode: MutableState<String>,
     resolutionCode: MutableState<String>
 ) {
     Row(
@@ -61,7 +61,7 @@ fun SecondCardView(
                 .weight(1f)
                 .padding(start = 10.dp)
         ) {
-            CornerView(cornerStateCode)
+            CornerView(cornerCode)
         }
     }
     Card(
@@ -127,9 +127,9 @@ fun PlatformView(
 
 @Composable
 fun CornerView(
-    cornerStateCode: MutableState<String>
+    cornerCode: MutableState<String>
 ) {
-    val cornerState = Data().cornerStateNames
+    val corner = Data().cornerNames
     val hapticFeedback = LocalHapticFeedback.current
 
     Column(
@@ -139,13 +139,13 @@ fun CornerView(
         Text(
             text = stringResource(R.string.corner)
         )
-        val cornerStateName = Preferences().perfGet("corner")?.let { Data().cornerStateName(it) } ?: cornerState[0]
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(cornerStateName) }
+        val cornerName = Preferences().perfGet("corner")?.let { Data().cornerName(it) } ?: corner[0]
+        val (selectedOption, onOptionSelected) = remember { mutableStateOf(cornerName) }
         Column(
             modifier = Modifier.selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            cornerState.forEach { text ->
+            corner.forEach { text ->
                 Row(
                     Modifier
                         .selectable(
@@ -153,7 +153,8 @@ fun CornerView(
                             onClick = {
                                 onOptionSelected(text)
                                 hapticFeedback.performHapticFeedback(LongPress)
-                                cornerStateCode.value = Data().cornerStateCode(text)
+                                cornerCode.value = Data().cornerCode(text)
+                                Preferences().perfSet("corner", cornerCode.value)
                             },
                             role = Role.RadioButton
                         )

@@ -99,7 +99,6 @@ fun App(resultsViewModel: ResultsViewModel) {
     val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
     val platformCode = remember { mutableStateOf(Preferences().perfGet("platform") ?: "software") }
     val resolutionCode = remember { mutableStateOf(Preferences().perfGet("resolution") ?: "512") }
-    val cornerStateCode = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
     val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
     val limit = remember { mutableIntStateOf(15) }
 
@@ -107,8 +106,8 @@ fun App(resultsViewModel: ResultsViewModel) {
     val corner by resultsViewModel.corner.collectAsState()
     val resolution by resultsViewModel.resolution.collectAsState()
 
-    LaunchedEffect(cornerStateCode.value, resolutionCode.value) {
-        resultsViewModel.updateCorner(cornerStateCode.value)
+    LaunchedEffect(cornerState.value, resolutionCode.value) {
+        resultsViewModel.updateCorner(cornerState.value)
         resultsViewModel.updateResolution(resolutionCode.value)
     }
 
@@ -137,7 +136,7 @@ fun App(resultsViewModel: ResultsViewModel) {
                         if (maxWidth < 768.dp) {
                             Column {
                                 MainCardView(appName, country)
-                                SecondCardView(platformCode, cornerStateCode, resolutionCode)
+                                SecondCardView(platformCode, cornerState, resolutionCode)
                                 ResultsView(results, corner, resolution)
                                 Spacer(Modifier.height(padding.calculateBottomPadding()))
                             }
@@ -151,7 +150,7 @@ fun App(resultsViewModel: ResultsViewModel) {
                                     ) {
                                         MainCardView(appName, country)
                                         Spacer(modifier = Modifier.height(20.dp))
-                                        SecondCardView(platformCode, cornerStateCode, resolutionCode)
+                                        SecondCardView(platformCode, cornerState, resolutionCode)
                                         Spacer(modifier = Modifier.height(20.dp))
                                     }
                                     Column(modifier = Modifier.weight(1.0f)) {

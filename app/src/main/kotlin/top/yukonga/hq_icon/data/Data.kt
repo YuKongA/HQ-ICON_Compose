@@ -38,22 +38,22 @@ class Data {
         return cut.resolutionName
     }
 
-    data class CornerStateData(val cornerStateName: String, val cornerStateCode: String)
+    data class CornerData(val cornerName: String, val cornerCode: String)
 
-    private val cornerStateList = listOf(
-        CornerStateData("Rounded", "1"),
-        CornerStateData("Original", "0")
+    private val cornerList = listOf(
+        CornerData("Rounded", "1"),
+        CornerData("Original", "0")
     )
-    val cornerStateNames = cornerStateList.map { it.cornerStateName }
+    val cornerNames = cornerList.map { it.cornerName }
 
-    fun cornerStateCode(cornerStateName: String): String {
-        val cornerState = cornerStateList.find { it.cornerStateName == cornerStateName } ?: return ""
-        return cornerState.cornerStateCode
+    fun cornerCode(cornerName: String): String {
+        val corner = cornerList.find { it.cornerName == cornerName } ?: return ""
+        return corner.cornerCode
     }
 
-    fun cornerStateName(cornerStateCode: String): String {
-        val cornerState = cornerStateList.find { it.cornerStateCode == cornerStateCode } ?: return ""
-        return cornerState.cornerStateName
+    fun cornerName(cornerCode: String): String {
+        val corner = cornerList.find { it.cornerCode == cornerCode } ?: return ""
+        return corner.cornerName
     }
 
     val country = listOf("CN", "US", "JP", "KR")
