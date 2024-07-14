@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,16 +21,19 @@ import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,6 +51,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -91,7 +96,7 @@ class MainActivity : ComponentActivity() {
 fun App(resultsViewModel: ResultsViewModel) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val fabOffsetHeight by animateDpAsState(
-        targetValue = if (scrollBehavior.state.contentOffset < -35) 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
+        targetValue = if (scrollBehavior.state.contentOffset < -35) 74.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
         animationSpec = tween(durationMillis = 300), label = ""
     )
 
@@ -115,33 +120,29 @@ fun App(resultsViewModel: ResultsViewModel) {
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .background(MaterialTheme.colorScheme.background)
-                .displayCutoutPadding(),
+                .displayCutoutPadding()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 TopAppBar(scrollBehavior)
-            },
-            floatingActionButton = {
-                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
-            },
-            floatingActionButtonPosition = FabPosition.End
+            }
         ) { padding ->
             LazyColumn(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(top = padding.calculateTopPadding())
                     .padding(horizontal = 20.dp)
             ) {
                 item {
                     BoxWithConstraints {
                         if (maxWidth < 768.dp) {
-                            Column {
+                            Column(modifier = Modifier.navigationBarsPadding()) {
                                 MainCardView(appName, country)
                                 SecondCardView(platformCode, cornerState, resolutionCode)
                                 ResultsView(results, corner, resolution)
-                                Spacer(Modifier.height(padding.calculateBottomPadding()))
                             }
                         } else {
-                            Column {
+                            Column(modifier = Modifier.navigationBarsPadding()) {
                                 Row {
                                     Column(
                                         modifier = Modifier
@@ -149,19 +150,26 @@ fun App(resultsViewModel: ResultsViewModel) {
                                             .padding(end = 20.dp)
                                     ) {
                                         MainCardView(appName, country)
-                                        Spacer(modifier = Modifier.height(20.dp))
                                         SecondCardView(platformCode, cornerState, resolutionCode)
-                                        Spacer(modifier = Modifier.height(20.dp))
                                     }
                                     Column(modifier = Modifier.weight(1.0f)) {
                                         ResultsView(results, corner, resolution)
                                     }
                                 }
-                                Spacer(Modifier.height(padding.calculateBottomPadding()))
                             }
                         }
+                        Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                     }
                 }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                    .padding(18.dp),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
             }
         }
     }
@@ -178,7 +186,6 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
                 maxLines = 1
             )
         },
-        actions = { AboutDialog() },
         colors = TopAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             actionIconContentColor = MaterialTheme.colorScheme.onBackground,
@@ -186,6 +193,7 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
             titleContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
+        actions = { AboutDialog() },
         scrollBehavior = scrollBehavior
     )
 }
@@ -228,7 +236,7 @@ private fun FloatActionButton(
         Icon(
             modifier = Modifier.height(20.dp),
             imageVector = Icons.Filled.Check,
-            contentDescription = null
+            contentDescription = stringResource(R.string.submit)
         )
         Spacer(
             modifier = Modifier.width(8.dp)

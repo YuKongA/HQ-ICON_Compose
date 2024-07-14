@@ -3,13 +3,13 @@ package top.yukonga.hq_icon.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ImageSearch
@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -46,13 +46,13 @@ import top.yukonga.hq_icon.R
 @Composable
 fun AboutDialog() {
     var showDialog by remember { mutableStateOf(false) }
-    val uriHandler = LocalUriHandler.current
     val hapticFeedback = LocalHapticFeedback.current
 
     IconButton(
+        modifier = Modifier.widthIn(max = 48.dp),
         onClick = {
             showDialog = true
-            hapticFeedback.performHapticFeedback(LongPress)
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
         }) {
         Icon(
             imageVector = Icons.Outlined.ImageSearch,
@@ -64,38 +64,41 @@ fun AboutDialog() {
         BasicAlertDialog(
             onDismissRequest = { showDialog = false },
             content = {
-                Box(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .size(280.dp, 150.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .widthIn(min = 350.dp, max = 380.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                 ) {
-                    Row(modifier = Modifier.padding(24.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .padding(top = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(14.dp))
                                 .background(MaterialTheme.colorScheme.primary)
                         ) {
                             Image(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_launcher_foreground),
                                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.size(30.dp),
                             )
                         }
-                        Column(
-                            modifier = Modifier.padding(start = 18.dp)
-                        ) {
+                        Column {
                             Text(
                                 text = stringResource(R.string.app_name),
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = MaterialTheme.typography.titleLarge.fontSize
                             )
                             Text(
-                                text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE.toString()),
+                                text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
                             )
                         }
@@ -103,23 +106,23 @@ fun AboutDialog() {
                     Column(
                         modifier = Modifier
                             .padding(horizontal = 24.dp)
-                            .padding(top = 88.dp)
+                            .padding(top = 12.dp, bottom = 18.dp)
                     ) {
+                        val uriHandler = LocalUriHandler.current
                         Row {
                             Text(
                                 text = stringResource(R.string.view_source) + " ",
-                                style = MaterialTheme.typography.bodyMedium
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize
                             )
                             Text(
                                 text = AnnotatedString(
                                     text = "GitHub",
                                     spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.primary)
                                 ),
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                                 modifier = Modifier.clickable(
                                     onClick = {
                                         uriHandler.openUri("https://github.com/YuKongA/HQ-ICON_Compose")
-                                        hapticFeedback.performHapticFeedback(LongPress)
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     }
                                 )
                             )
@@ -134,11 +137,10 @@ fun AboutDialog() {
                                     text = "Telegram",
                                     spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MaterialTheme.colorScheme.primary)
                                 ),
-                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                                 modifier = Modifier.clickable(
                                     onClick = {
                                         uriHandler.openUri("https://t.me/YuKongA13579")
-                                        hapticFeedback.performHapticFeedback(LongPress)
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     }
                                 )
                             )
