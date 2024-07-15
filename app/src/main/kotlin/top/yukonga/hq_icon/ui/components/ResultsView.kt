@@ -7,14 +7,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
@@ -71,8 +70,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
         exit = fadeOut() + shrinkVertically()
     ) {
         Card(
-            modifier = Modifier
-                .padding(bottom = 20.dp),
+            modifier = Modifier.padding(bottom = 20.dp),
             shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -80,8 +78,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
             )
         ) {
             Row(
-                modifier = Modifier
-                    .padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
@@ -167,13 +164,11 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
 
 @Composable
 fun MessageText(text: String, style: TextStyle) {
-    val scrollState = rememberScrollState()
-
     Text(
         text = text,
         style = style,
-        modifier = Modifier.horizontalScroll(scrollState),
-        maxLines = 1
+        maxLines = 1,
+        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE, initialDelayMillis = 3000, velocity = 15.dp)
     )
 }
 
