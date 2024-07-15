@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -88,7 +89,7 @@ fun AboutDialog() {
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_launcher_foreground),
                                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
                                 contentDescription = null,
-                                modifier = Modifier.size(30.dp),
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                         Column {

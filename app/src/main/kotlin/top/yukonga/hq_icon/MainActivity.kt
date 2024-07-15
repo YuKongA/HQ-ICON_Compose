@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -29,6 +28,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -47,14 +47,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -95,9 +100,36 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App(resultsViewModel: ResultsViewModel) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
+    val listState = rememberLazyListState()
+    var fabVisible by remember { mutableStateOf(true) }
+    var scrollDistance by remember { mutableFloatStateOf(0f) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val isScrolledToEnd =
+                    (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 && (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.size
+                        ?: 0) < listState.layoutInfo.viewportEndOffset)
+
+                val delta = available.y
+                if (!isScrolledToEnd) {
+                    scrollDistance += delta
+                    if (scrollDistance < -50f) {
+                        if (fabVisible) fabVisible = false
+                        scrollDistance = 0f
+                    } else if (scrollDistance > 50f) {
+                        if (!fabVisible) fabVisible = true
+                        scrollDistance = 0f
+                    }
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     val fabOffsetHeight by animateDpAsState(
-        targetValue = if (scrollBehavior.state.contentOffset < -35) 74.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() else 0.dp,
-        animationSpec = tween(durationMillis = 300), label = ""
+        targetValue = if (fabVisible) 0.dp else 74.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding(), // 74.dp = FAB + FAB Padding
+        animationSpec = tween(durationMillis = 350), label = ""
     )
 
     val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
@@ -127,49 +159,54 @@ fun App(resultsViewModel: ResultsViewModel) {
                 TopAppBar(scrollBehavior)
             }
         ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
-                    .padding(horizontal = 20.dp)
+            Box(
+                modifier = Modifier.nestedScroll(nestedScrollConnection)
             ) {
-                item {
-                    BoxWithConstraints {
-                        if (maxWidth < 768.dp) {
-                            Column(modifier = Modifier.navigationBarsPadding()) {
-                                MainCardView(appName, country)
-                                SecondCardView(platformCode, cornerState, resolutionCode)
-                                ResultsView(results, corner, resolution)
-                            }
-                        } else {
-                            Column(modifier = Modifier.navigationBarsPadding()) {
-                                Row {
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(0.8f)
-                                            .padding(end = 20.dp)
-                                    ) {
-                                        MainCardView(appName, country)
-                                        SecondCardView(platformCode, cornerState, resolutionCode)
-                                    }
-                                    Column(modifier = Modifier.weight(1.0f)) {
-                                        ResultsView(results, corner, resolution)
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = padding.calculateTopPadding())
+                        .padding(horizontal = 20.dp)
+                ) {
+                    item {
+                        BoxWithConstraints {
+                            if (maxWidth < 768.dp) {
+                                Column(modifier = Modifier.navigationBarsPadding()) {
+                                    MainCardView(appName, country)
+                                    SecondCardView(platformCode, cornerState, resolutionCode)
+                                    ResultsView(results, corner, resolution)
+                                }
+                            } else {
+                                Column(modifier = Modifier.navigationBarsPadding()) {
+                                    Row {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(0.8f)
+                                                .padding(end = 20.dp)
+                                        ) {
+                                            MainCardView(appName, country)
+                                            SecondCardView(platformCode, cornerState, resolutionCode)
+                                        }
+                                        Column(modifier = Modifier.weight(1.0f)) {
+                                            ResultsView(results, corner, resolution)
+                                        }
                                     }
                                 }
                             }
+                            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                         }
-                        Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                     }
                 }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-                    .padding(18.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .systemBarsPadding()
+                        .padding(18.dp),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
+                }
             }
         }
     }
