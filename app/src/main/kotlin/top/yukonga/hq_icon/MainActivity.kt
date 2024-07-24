@@ -9,7 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -37,6 +37,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
@@ -149,63 +150,66 @@ fun App(resultsViewModel: ResultsViewModel) {
     }
 
     HqIconTheme {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .displayCutoutPadding()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                TopAppBar(scrollBehavior)
-            }
-        ) { padding ->
-            Box(
-                modifier = Modifier.nestedScroll(nestedScrollConnection)
-            ) {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = padding.calculateTopPadding())
-                        .padding(horizontal = 20.dp)
+        Surface(
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .displayCutoutPadding()
+                    .imePadding()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                topBar = {
+                    TopAppBar(scrollBehavior)
+                }
+            ) { padding ->
+                Box(
+                    modifier = Modifier.nestedScroll(nestedScrollConnection)
                 ) {
-                    item {
-                        BoxWithConstraints {
-                            if (maxWidth < 768.dp) {
-                                Column(modifier = Modifier.navigationBarsPadding()) {
-                                    MainCardView(appName, country)
-                                    SecondCardView(platformCode, cornerState, resolutionCode)
-                                    ResultsView(results, corner, resolution)
-                                }
-                            } else {
-                                Column(modifier = Modifier.navigationBarsPadding()) {
-                                    Row {
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(0.8f)
-                                                .padding(end = 20.dp)
-                                        ) {
-                                            MainCardView(appName, country)
-                                            SecondCardView(platformCode, cornerState, resolutionCode)
-                                        }
-                                        Column(modifier = Modifier.weight(1.0f)) {
-                                            ResultsView(results, corner, resolution)
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .padding(top = padding.calculateTopPadding())
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        item {
+                            BoxWithConstraints {
+                                if (maxWidth < 768.dp) {
+                                    Column(modifier = Modifier.navigationBarsPadding()) {
+                                        MainCardView(appName, country)
+                                        SecondCardView(platformCode, cornerState, resolutionCode)
+                                        ResultsView(results, corner, resolution)
+                                    }
+                                } else {
+                                    Column(modifier = Modifier.navigationBarsPadding()) {
+                                        Row {
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(0.8f)
+                                                    .padding(end = 20.dp)
+                                            ) {
+                                                MainCardView(appName, country)
+                                                SecondCardView(platformCode, cornerState, resolutionCode)
+                                            }
+                                            Column(modifier = Modifier.weight(1.0f)) {
+                                                ResultsView(results, corner, resolution)
+                                            }
                                         }
                                     }
                                 }
+                                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                             }
-                            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                         }
                     }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .systemBarsPadding()
-                        .padding(18.dp),
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .systemBarsPadding()
+                            .padding(18.dp),
+                        contentAlignment = Alignment.BottomEnd
+                    ) {
+                        FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
+                    }
                 }
             }
         }
