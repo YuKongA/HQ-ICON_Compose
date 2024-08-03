@@ -32,17 +32,16 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun HqIconTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+fun AppTheme(
+    colorMode: Int = 0,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
+        colorScheme = when (colorMode) {
+            1 -> LightColorScheme
+            2 -> DarkColorScheme
+            else -> if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
+        },
+        content = content,
     )
 }

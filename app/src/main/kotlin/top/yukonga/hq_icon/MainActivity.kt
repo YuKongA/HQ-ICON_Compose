@@ -4,11 +4,13 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -72,7 +75,8 @@ import top.yukonga.hq_icon.ui.components.AboutDialog
 import top.yukonga.hq_icon.ui.components.MainCardView
 import top.yukonga.hq_icon.ui.components.ResultsView
 import top.yukonga.hq_icon.ui.components.SecondCardView
-import top.yukonga.hq_icon.ui.theme.HqIconTheme
+import top.yukonga.hq_icon.ui.components.TuneDialog
+import top.yukonga.hq_icon.ui.theme.AppTheme
 import top.yukonga.hq_icon.utils.AppContext
 import top.yukonga.hq_icon.utils.Preferences
 import top.yukonga.hq_icon.utils.Search
@@ -86,20 +90,35 @@ class MainActivity : ComponentActivity() {
 
         AppContext.init(this)
 
-        enableEdgeToEdge()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
-
         val resultsViewModel: ResultsViewModel by viewModels()
 
         setContent {
-            App(resultsViewModel)
+            val colorMode = remember { mutableIntStateOf(Preferences().perfGet("colorMode")?.toInt() ?: 0) }
+            val darkMode = colorMode.intValue == 2 || (isSystemInDarkTheme() && colorMode.intValue == 0)
+
+            DisposableEffect(darkMode) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkMode },
+                    navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkMode },
+                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false // Xiaomi moment, this code must be here
+                }
+
+                onDispose {}
+            }
+            App(resultsViewModel, colorMode)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(resultsViewModel: ResultsViewModel) {
+fun App(
+    resultsViewModel: ResultsViewModel,
+    colorMode: MutableState<Int> = remember { mutableIntStateOf(Preferences().perfGet("colorMode")?.toInt() ?: 0) }
+) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val listState = rememberLazyListState()
@@ -149,7 +168,7 @@ fun App(resultsViewModel: ResultsViewModel) {
         resultsViewModel.updateResolution(resolutionCode.value)
     }
 
-    HqIconTheme {
+    AppTheme(colorMode = colorMode.value) {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
@@ -160,7 +179,7 @@ fun App(resultsViewModel: ResultsViewModel) {
                     .imePadding()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
-                    TopAppBar(scrollBehavior)
+                    TopAppBar(scrollBehavior, colorMode)
                 }
             ) { padding ->
                 Box(
@@ -218,7 +237,7 @@ fun App(resultsViewModel: ResultsViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
+private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior, colorMode: MutableState<Int>) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -234,7 +253,8 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
             titleContentColor = MaterialTheme.colorScheme.onBackground,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
-        actions = { AboutDialog() },
+        navigationIcon = { AboutDialog() },
+        actions = { TuneDialog(colorMode) },
         scrollBehavior = scrollBehavior
     )
 }
@@ -252,22 +272,27 @@ private fun FloatActionButton(
     val coroutineScope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
     val searching = stringResource(R.string.searching)
+    val appNameEmpty = stringResource(R.string.appNameEmpty)
 
     ExtendedFloatingActionButton(
         modifier = Modifier.offset(y = fabOffsetHeight),
         onClick = {
-            Toast.makeText(AppContext.context, searching, Toast.LENGTH_SHORT).show()
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            coroutineScope.launch {
-                if (term.value != "") {
-                    val results = Search().search(term.value, country.value, platform.value, limit.value)
-                    val response = Utils().json.decodeFromString<Response.Root>(results)
-                    resultsViewModel.updateResults(response.results)
+            if (term.value == "") {
+                Toast.makeText(AppContext.context, appNameEmpty, Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(AppContext.context, searching, Toast.LENGTH_SHORT).show()
+                coroutineScope.launch {
+                    if (term.value != "") {
+                        val results = Search().search(term.value, country.value, platform.value, limit.value)
+                        val response = Utils().json.decodeFromString<Response.Root>(results)
+                        resultsViewModel.updateResults(response.results)
 
-                    Preferences().perfSet("appName", term.value)
-                    Preferences().perfSet("country", country.value)
-                    Preferences().perfSet("platform", platform.value)
-                    Preferences().perfSet("corner", cornerState.value)
+                        Preferences().perfSet("appName", term.value)
+                        Preferences().perfSet("country", country.value)
+                        Preferences().perfSet("platform", platform.value)
+                        Preferences().perfSet("corner", cornerState.value)
+                    }
                 }
             }
         },

@@ -13,4 +13,10 @@
     <string name="download_successful">Download successful</string>
     <string name="download_failed">Download failed</string>
     <string name="searching">Searching…</string>
+    <string name="appNameEmpty">App name is empty</string>
+    <string name="extension_settings">Extension settings</string>
+    <string name="dark_theme">Display mode</string>
+    <string name="system_default">System default</string>
+    <string name="light_mode">Light mode</string>
+    <string name="dark_mode">Dark mode</string>
 </resources>

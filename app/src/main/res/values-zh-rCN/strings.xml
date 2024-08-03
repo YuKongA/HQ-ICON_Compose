@@ -12,4 +12,10 @@
     <string name="download_successful">下载成功</string>
     <string name="download_failed">下载失败</string>
     <string name="searching">开始搜索…</string>
+    <string name="appNameEmpty">应用名称为空</string>
+    <string name="extension_settings">扩展设置</string>
+    <string name="dark_theme">显示模式</string>
+    <string name="system_default">跟随系统</string>
+    <string name="light_mode">浅色模式</string>
+    <string name="dark_mode">深色模式</string>
 </resources>
