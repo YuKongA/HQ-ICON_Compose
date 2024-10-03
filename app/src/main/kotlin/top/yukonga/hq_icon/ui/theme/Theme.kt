@@ -33,15 +33,10 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun AppTheme(
-    colorMode: Int = 0,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = when (colorMode) {
-            1 -> LightColorScheme
-            2 -> DarkColorScheme
-            else -> if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme
-        },
+        colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme,
         content = content,
     )
 }

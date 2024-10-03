@@ -51,7 +51,7 @@ fun TextFieldWithDropdown(
             label = { Text(label) },
             readOnly = true,
             singleLine = true,
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             modifier = Modifier
                 .menuAnchor(type = PrimaryNotEditable, enabled = true)
                 .fillMaxWidth(),
@@ -62,7 +62,7 @@ fun TextFieldWithDropdown(
             modifier = Modifier
                 .exposedDropdownSize()
                 .heightIn(max = 250.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             containerColor = MaterialTheme.colorScheme.background,
             expanded = isDropdownExpanded,
             onDismissRequest = { isDropdownExpanded = false },

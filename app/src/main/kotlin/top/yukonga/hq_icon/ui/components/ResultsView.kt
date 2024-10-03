@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -36,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
@@ -71,7 +72,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
     ) {
         Card(
             modifier = Modifier.padding(bottom = 20.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -110,26 +111,32 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
-                Text(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .clickable {
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            coroutineScope.launch {
-                                Download().downloadImage(
-                                    context,
-                                    result.artworkUrl512,
-                                    result.trackName,
-                                    resolution,
-                                    corner
-                                )
-                            }
-                        },
-                    fontWeight = FontWeight.Bold,
-                    text = stringResource(R.string.download),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                TextButton(
+                    modifier = Modifier.padding(start = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(15.dp),
+                    onClick = {
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                        coroutineScope.launch {
+                            Download().downloadImage(
+                                context,
+                                result.artworkUrl512,
+                                result.trackName,
+                                resolution,
+                                corner
+                            )
+                        }
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.download),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

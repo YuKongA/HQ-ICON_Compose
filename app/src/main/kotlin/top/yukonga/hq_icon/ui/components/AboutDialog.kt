@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -29,12 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,12 +47,15 @@ fun AboutDialog() {
     val hapticFeedback = LocalHapticFeedback.current
 
     IconButton(
-        modifier = Modifier.widthIn(max = 48.dp),
+        modifier = Modifier
+            .widthIn(max = 48.dp)
+            .padding(start = 4.dp),
         onClick = {
             showDialog = true
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
         }) {
         Icon(
+            modifier = Modifier.padding(start = 1.dp),
             imageVector = Icons.Outlined.ImageSearch,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface
@@ -68,7 +68,7 @@ fun AboutDialog() {
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(24.dp))
-                        .widthIn(min = 350.dp, max = 380.dp)
+                        .widthIn(min = 220.dp, max = 380.dp)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                 ) {
                     Row(
@@ -81,15 +81,17 @@ fun AboutDialog() {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(46.dp)
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(MaterialTheme.colorScheme.primary)
                         ) {
                             Image(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_launcher_foreground),
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .padding(start = 2.dp),
+                                imageVector = Icons.Outlined.ImageSearch,
                                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize()
+                                contentDescription = null
                             )
                         }
                         Column {

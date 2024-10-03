@@ -40,7 +40,7 @@ fun SecondCardView(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Card(
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -52,7 +52,7 @@ fun SecondCardView(
             PlatformView(platformCode)
         }
         Card(
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -65,7 +65,7 @@ fun SecondCardView(
         }
     }
     Card(
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = CardDefaults.cardColors(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             containerColor = MaterialTheme.colorScheme.primaryContainer

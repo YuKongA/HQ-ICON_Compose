@@ -41,7 +41,7 @@ fun AppNameView(
         value = appName.value,
         onValueChange = { appName.value = it },
         label = { Text(stringResource(R.string.appName)) },
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(15.dp),
         maxLines = 1,
         leadingIcon = { Icon(imageVector = Icons.Outlined.ImageSearch, null) },
     )

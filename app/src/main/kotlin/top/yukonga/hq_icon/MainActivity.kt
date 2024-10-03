@@ -65,6 +65,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -75,7 +76,6 @@ import top.yukonga.hq_icon.ui.components.AboutDialog
 import top.yukonga.hq_icon.ui.components.MainCardView
 import top.yukonga.hq_icon.ui.components.ResultsView
 import top.yukonga.hq_icon.ui.components.SecondCardView
-import top.yukonga.hq_icon.ui.components.TuneDialog
 import top.yukonga.hq_icon.ui.theme.AppTheme
 import top.yukonga.hq_icon.utils.AppContext
 import top.yukonga.hq_icon.utils.Preferences
@@ -103,12 +103,12 @@ class MainActivity : ComponentActivity() {
                 )
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    window.isNavigationBarContrastEnforced = false // Xiaomi moment, this code must be here
+                    window.isNavigationBarContrastEnforced = false
                 }
 
                 onDispose {}
             }
-            App(resultsViewModel, colorMode)
+            App(resultsViewModel)
         }
     }
 }
@@ -116,8 +116,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
-    resultsViewModel: ResultsViewModel,
-    colorMode: MutableState<Int> = remember { mutableIntStateOf(Preferences().perfGet("colorMode")?.toInt() ?: 0) }
+    resultsViewModel: ResultsViewModel
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
@@ -168,7 +167,7 @@ fun App(
         resultsViewModel.updateResolution(resolutionCode.value)
     }
 
-    AppTheme(colorMode = colorMode.value) {
+    AppTheme() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
@@ -179,7 +178,7 @@ fun App(
                     .imePadding()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
-                    TopAppBar(scrollBehavior, colorMode)
+                    TopAppBar(scrollBehavior)
                 }
             ) { padding ->
                 Box(
@@ -237,7 +236,7 @@ fun App(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior, colorMode: MutableState<Int>) {
+private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -254,7 +253,6 @@ private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior, colorMode: Mutabl
             scrolledContainerColor = MaterialTheme.colorScheme.background,
         ),
         navigationIcon = { AboutDialog() },
-        actions = { TuneDialog(colorMode) },
         scrollBehavior = scrollBehavior
     )
 }
@@ -270,6 +268,7 @@ private fun FloatActionButton(
     resultsViewModel: ResultsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     val searching = stringResource(R.string.searching)
     val appNameEmpty = stringResource(R.string.appNameEmpty)
@@ -279,9 +278,9 @@ private fun FloatActionButton(
         onClick = {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             if (term.value == "") {
-                Toast.makeText(AppContext.context, appNameEmpty, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, appNameEmpty, Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(AppContext.context, searching, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, searching, Toast.LENGTH_SHORT).show()
                 coroutineScope.launch {
                     if (term.value != "") {
                         val results = Search().search(term.value, country.value, platform.value, limit.value)
