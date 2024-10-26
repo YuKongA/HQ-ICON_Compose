@@ -4,72 +4,47 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.haze
+import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.launch
 import top.yukonga.hq_icon.data.Response
 import top.yukonga.hq_icon.ui.components.AboutDialog
@@ -82,6 +57,15 @@ import top.yukonga.hq_icon.utils.Preferences
 import top.yukonga.hq_icon.utils.Search
 import top.yukonga.hq_icon.utils.Utils
 import top.yukonga.hq_icon.viewModel.ResultsViewModel
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.LazyColumn
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.getWindowSize
 
 class MainActivity : ComponentActivity() {
 
@@ -92,141 +76,111 @@ class MainActivity : ComponentActivity() {
 
         val resultsViewModel: ResultsViewModel by viewModels()
 
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         setContent {
-            val colorMode = remember { mutableIntStateOf(Preferences().perfGet("colorMode")?.toInt() ?: 0) }
-            val darkMode = colorMode.intValue == 2 || (isSystemInDarkTheme() && colorMode.intValue == 0)
-
-            DisposableEffect(darkMode) {
-                enableEdgeToEdge(
-                    statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkMode },
-                    navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkMode },
-                )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    window.isNavigationBarContrastEnforced = false
-                }
-
-                onDispose {}
-            }
             App(resultsViewModel)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     resultsViewModel: ResultsViewModel
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    AppTheme {
+        val scrollBehavior = MiuixScrollBehavior(rememberTopAppBarState())
 
-    val listState = rememberLazyListState()
-    var fabVisible by remember { mutableStateOf(true) }
-    var scrollDistance by remember { mutableFloatStateOf(0f) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val isScrolledToEnd =
-                    (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1 && (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.size
-                        ?: 0) < listState.layoutInfo.viewportEndOffset)
+        val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
+        val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
+        val platformCode = remember { mutableStateOf(Preferences().perfGet("platform") ?: "software") }
+        val resolutionCode = remember { mutableStateOf(Preferences().perfGet("resolution") ?: "512") }
+        val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
+        val limit = remember { mutableIntStateOf(15) }
 
-                val delta = available.y
-                if (!isScrolledToEnd) {
-                    scrollDistance += delta
-                    if (scrollDistance < -50f) {
-                        if (fabVisible) fabVisible = false
-                        scrollDistance = 0f
-                    } else if (scrollDistance > 50f) {
-                        if (!fabVisible) fabVisible = true
-                        scrollDistance = 0f
-                    }
-                }
-                return Offset.Zero
-            }
+        val results by resultsViewModel.results.collectAsState()
+        val corner by resultsViewModel.corner.collectAsState()
+        val resolution by resultsViewModel.resolution.collectAsState()
+
+        LaunchedEffect(cornerState.value, resolutionCode.value) {
+            resultsViewModel.updateCorner(cornerState.value)
+            resultsViewModel.updateResolution(resolutionCode.value)
         }
-    }
 
-    val fabOffsetHeight by animateDpAsState(
-        targetValue = if (fabVisible) 0.dp else 74.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding(), // 74.dp = FAB + FAB Padding
-        animationSpec = tween(durationMillis = 350), label = ""
-    )
+        val hazeState = remember { HazeState() }
 
-    val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
-    val country = remember { mutableStateOf(Preferences().perfGet("country") ?: "CN") }
-    val platformCode = remember { mutableStateOf(Preferences().perfGet("platform") ?: "software") }
-    val resolutionCode = remember { mutableStateOf(Preferences().perfGet("resolution") ?: "512") }
-    val cornerState = remember { mutableStateOf(Preferences().perfGet("corner") ?: "1") }
-    val limit = remember { mutableIntStateOf(15) }
-
-    val results by resultsViewModel.results.collectAsState()
-    val corner by resultsViewModel.corner.collectAsState()
-    val resolution by resultsViewModel.resolution.collectAsState()
-
-    LaunchedEffect(cornerState.value, resolutionCode.value) {
-        resultsViewModel.updateCorner(cornerState.value)
-        resultsViewModel.updateResolution(resolutionCode.value)
-    }
-
-    AppTheme() {
+        val hazeStyleTopAppBar = HazeStyle(
+            blurRadius = 25.dp,
+            backgroundColor = if (scrollBehavior.state.heightOffset > -1) Color.Transparent else MiuixTheme.colorScheme.background,
+            tint = HazeTint(
+                MiuixTheme.colorScheme.background.copy(
+                    if (scrollBehavior.state.heightOffset > -1) 1f
+                    else lerp(1f, 0.67f, (scrollBehavior.state.heightOffset + 1) / -143f)
+                )
+            )
+        )
         Surface(
-            color = MaterialTheme.colorScheme.background
+            modifier = Modifier.fillMaxSize()
         ) {
             Scaffold(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .displayCutoutPadding()
-                    .imePadding()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
                 topBar = {
-                    TopAppBar(scrollBehavior)
+                    TopAppBar(
+                        color = Color.Transparent,
+                        modifier = Modifier
+                            .hazeChild(
+                                state = hazeState,
+                                style = hazeStyleTopAppBar
+                            ),
+                        title = stringResource(R.string.app_name),
+                        navigationIcon = { AboutDialog() },
+                        scrollBehavior = scrollBehavior
+                    )
                 }
             ) { padding ->
-                Box(
-                    modifier = Modifier.nestedScroll(nestedScrollConnection)
+                LazyColumn(
+                    modifier = Modifier
+                        .haze(state = hazeState)
+                        .height(getWindowSize().height.dp)
+                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                        .padding(top = 12.dp)
+                        .padding(horizontal = 12.dp)
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
                 ) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .padding(top = padding.calculateTopPadding())
-                            .padding(horizontal = 20.dp)
-                    ) {
-                        item {
-                            BoxWithConstraints {
-                                if (maxWidth < 768.dp) {
-                                    Column(modifier = Modifier.navigationBarsPadding()) {
-                                        MainCardView(appName, country)
-                                        SecondCardView(platformCode, cornerState, resolutionCode)
-                                        ResultsView(results, corner, resolution)
-                                    }
-                                } else {
-                                    Column(modifier = Modifier.navigationBarsPadding()) {
-                                        Row {
-                                            Column(
-                                                modifier = Modifier
-                                                    .weight(0.8f)
-                                                    .padding(end = 20.dp)
-                                            ) {
-                                                MainCardView(appName, country)
-                                                SecondCardView(platformCode, cornerState, resolutionCode)
-                                            }
-                                            Column(modifier = Modifier.weight(1.0f)) {
-                                                ResultsView(results, corner, resolution)
-                                            }
+                    item {
+                        BoxWithConstraints(
+                            Modifier.padding(top = padding.calculateTopPadding())
+                        ) {
+                            if (maxWidth < 768.dp) {
+                                Column(modifier = Modifier.navigationBarsPadding()) {
+                                    MainCardView(appName, country)
+                                    SecondCardView(platformCode, cornerState, resolutionCode)
+                                    Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
+                                    ResultsView(results, corner, resolution)
+                                }
+                            } else {
+                                Column(modifier = Modifier.navigationBarsPadding()) {
+                                    Row {
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(0.8f)
+                                                .padding(end = 12.dp)
+                                        ) {
+                                            MainCardView(appName, country)
+                                            SecondCardView(platformCode, cornerState, resolutionCode)
+                                            Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
+                                        }
+                                        Column(modifier = Modifier.weight(1.0f)) {
+                                            ResultsView(results, corner, resolution)
                                         }
                                     }
                                 }
-                                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                             }
+                            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                         }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .systemBarsPadding()
-                            .padding(18.dp),
-                        contentAlignment = Alignment.BottomEnd
-                    ) {
-                        FloatActionButton(fabOffsetHeight, appName, country, platformCode, limit, cornerState, resultsViewModel)
+
                     }
                 }
             }
@@ -234,32 +188,8 @@ fun App(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1
-            )
-        },
-        colors = TopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
-            scrolledContainerColor = MaterialTheme.colorScheme.background,
-        ),
-        navigationIcon = { AboutDialog() },
-        scrollBehavior = scrollBehavior
-    )
-}
-
-@Composable
-private fun FloatActionButton(
-    fabOffsetHeight: Dp,
+private fun Button(
     term: MutableState<String>,
     country: MutableState<String>,
     platform: MutableState<String>,
@@ -269,14 +199,16 @@ private fun FloatActionButton(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val hapticFeedback = LocalHapticFeedback.current
     val searching = stringResource(R.string.searching)
     val appNameEmpty = stringResource(R.string.appNameEmpty)
 
-    ExtendedFloatingActionButton(
-        modifier = Modifier.offset(y = fabOffsetHeight),
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+        text = stringResource(R.string.submit),
+        submit = true,
         onClick = {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             if (term.value == "") {
                 Toast.makeText(context, appNameEmpty, Toast.LENGTH_SHORT).show()
             } else {
@@ -294,21 +226,6 @@ private fun FloatActionButton(
                     }
                 }
             }
-        },
-        containerColor = Color(0xFF0D84FF),
-        contentColor = Color(0xFFFFFFFF),
-    ) {
-        Icon(
-            modifier = Modifier.height(20.dp),
-            imageVector = Icons.Filled.Check,
-            contentDescription = stringResource(R.string.submit)
-        )
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-        Text(
-            text = stringResource(R.string.submit),
-            modifier = Modifier.height(20.dp)
-        )
-    }
+        }
+    )
 }

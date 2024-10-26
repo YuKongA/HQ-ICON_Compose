@@ -3,20 +3,18 @@ package top.yukonga.hq_icon.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ImageSearch
-import androidx.compose.material.icons.outlined.TravelExplore
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Data
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MainCardView(
@@ -25,7 +23,7 @@ fun MainCardView(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         AppNameView(appName)
         CountryView(country)
@@ -36,14 +34,15 @@ fun MainCardView(
 fun AppNameView(
     appName: MutableState<String>
 ) {
-    OutlinedTextField(
+    TextField(
+        insideMargin = DpSize(16.dp, 20.dp),
         modifier = Modifier.fillMaxWidth(),
         value = appName.value,
         onValueChange = { appName.value = it },
-        label = { Text(stringResource(R.string.appName)) },
-        shape = RoundedCornerShape(15.dp),
+        label = stringResource(R.string.appName),
+        backgroundColor = MiuixTheme.colorScheme.surface,
         maxLines = 1,
-        leadingIcon = { Icon(imageVector = Icons.Outlined.ImageSearch, null) },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
     )
 }
 
@@ -54,7 +53,6 @@ fun CountryView(
     TextFieldWithDropdown(
         text = country,
         items = Data().country,
-        label = stringResource(R.string.country),
-        leadingIcon = Icons.Outlined.TravelExplore,
+        label = stringResource(R.string.country)
     )
 }
