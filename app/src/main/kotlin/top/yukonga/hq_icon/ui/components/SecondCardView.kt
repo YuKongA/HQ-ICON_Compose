@@ -10,8 +10,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -63,7 +61,6 @@ fun PlatformView(
     platformCode: MutableState<String>
 ) {
     val platform = Data().platformNames
-    val hapticFeedback = LocalHapticFeedback.current
 
     Column {
         Text(
@@ -80,7 +77,6 @@ fun PlatformView(
                     checked = (text == selectedOption),
                     onCheckedChange = {
                         onOptionSelected(text)
-                        hapticFeedback.performHapticFeedback(LongPress)
                         platformCode.value = Data().platformCode(text)
                     }
                 )
@@ -94,7 +90,6 @@ fun CornerView(
     cornerCode: MutableState<String>
 ) {
     val corner = Data().cornerNames
-    val hapticFeedback = LocalHapticFeedback.current
 
     Column {
         Text(
@@ -111,7 +106,6 @@ fun CornerView(
                     checked = (text == selectedOption),
                     onCheckedChange = {
                         onOptionSelected(text)
-                        hapticFeedback.performHapticFeedback(LongPress)
                         cornerCode.value = Data().cornerCode(text)
                     }
                 )
@@ -125,7 +119,6 @@ fun ResolutionView(
     resolutionCode: MutableState<String>
 ) {
     val resolution = Data().resolutionNames
-    val hapticFeedback = LocalHapticFeedback.current
 
     Column {
         Text(
@@ -143,7 +136,6 @@ fun ResolutionView(
                     checked = (text == selectedOption),
                     onCheckedChange = {
                         onOptionSelected(text)
-                        hapticFeedback.performHapticFeedback(LongPress)
                         resolutionCode.value = Data().resolutionCode(text)
                     }
                 )
