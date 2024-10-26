@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -21,8 +20,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -139,48 +135,77 @@ fun App(
                     )
                 }
             ) { padding ->
-                LazyColumn(
-                    modifier = Modifier
+                BoxWithConstraints(
+                    Modifier
+                        .padding(top = padding.calculateTopPadding())
                         .haze(state = hazeState)
-                        .height(getWindowSize().height.dp)
-                        .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-                        .padding(top = 12.dp)
-                        .padding(horizontal = 12.dp)
-                        .nestedScroll(scrollBehavior.nestedScrollConnection)
                 ) {
-                    item {
-                        BoxWithConstraints(
-                            Modifier.padding(top = padding.calculateTopPadding())
+                    if (maxWidth < 768.dp) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(getWindowSize().height.dp)
+                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                                .padding(top = 12.dp)
+                                .padding(horizontal = 12.dp),
+                            topAppBarScrollBehavior = scrollBehavior
                         ) {
-                            if (maxWidth < 768.dp) {
+                            item {
                                 Column(modifier = Modifier.navigationBarsPadding()) {
                                     MainCardView(appName, country)
                                     SecondCardView(platformCode, cornerState, resolutionCode)
                                     Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
                                     ResultsView(results, corner, resolution)
                                 }
-                            } else {
-                                Column(modifier = Modifier.navigationBarsPadding()) {
-                                    Row {
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(0.8f)
-                                                .padding(end = 12.dp)
-                                        ) {
-                                            MainCardView(appName, country)
-                                            SecondCardView(platformCode, cornerState, resolutionCode)
-                                            Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
+                                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+                        ) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .height(getWindowSize().height.dp)
+                                    .padding(top = 12.dp)
+                                    .padding(horizontal = 12.dp)
+                                    .weight(1f),
+                                topAppBarScrollBehavior = scrollBehavior
+                            ) {
+                                item {
+                                    Column(
+                                        modifier = Modifier.navigationBarsPadding()
+                                    ) {
+                                        Row {
+                                            Column(
+                                                modifier = Modifier
+                                                    .weight(0.8f)
+                                            ) {
+                                                MainCardView(appName, country)
+                                                SecondCardView(platformCode, cornerState, resolutionCode)
+                                                Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
+                                            }
                                         }
-                                        Column(modifier = Modifier.weight(1.0f)) {
-                                            ResultsView(results, corner, resolution)
-                                        }
+                                    }
+
+                                }
+                            }
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(end = 12.dp)
+                                    .weight(1f)
+                                    .height(getWindowSize().height.dp)
+                                    .padding(top = 12.dp),
+                                topAppBarScrollBehavior = scrollBehavior
+                            ) {
+                                item {
+                                    Column(modifier = Modifier.navigationBarsPadding()) {
+                                        ResultsView(results, corner, resolution)
                                     }
                                 }
                             }
-                            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
                         }
-
                     }
                 }
             }

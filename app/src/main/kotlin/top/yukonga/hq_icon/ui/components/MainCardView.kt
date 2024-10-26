@@ -3,10 +3,12 @@ package top.yukonga.hq_icon.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpSize
@@ -34,6 +36,7 @@ fun MainCardView(
 fun AppNameView(
     appName: MutableState<String>
 ) {
+    val focusManager = LocalFocusManager.current
     TextField(
         insideMargin = DpSize(16.dp, 20.dp),
         modifier = Modifier.fillMaxWidth(),
@@ -43,6 +46,11 @@ fun AppNameView(
         backgroundColor = MiuixTheme.colorScheme.surface,
         maxLines = 1,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+            }
+        )
     )
 }
 
