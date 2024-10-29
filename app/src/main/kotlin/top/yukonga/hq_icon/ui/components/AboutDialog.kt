@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -75,7 +76,9 @@ fun AboutDialog() {
                 modifier = Modifier.padding(top = 12.dp)
             ) {
                 val uriHandler = LocalUriHandler.current
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.view_source) + " "
                     )
@@ -92,7 +95,9 @@ fun AboutDialog() {
                         )
                     )
                 }
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(R.string.join_group) + " "
                     )
