@@ -137,6 +137,7 @@ fun ResolutionView(
                     onCheckedChange = {
                         onOptionSelected(text)
                         resolutionCode.value = Data().resolutionCode(text)
+                        Preferences().perfSet("resolution", Data().resolutionCode(text))
                     }
                 )
             }

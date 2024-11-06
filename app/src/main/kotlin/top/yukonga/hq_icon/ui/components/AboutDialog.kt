@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -21,8 +20,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.BuildConfig
@@ -55,26 +52,12 @@ fun AboutDialog() {
     }
 
     SuperDialog(
-        modifier = Modifier.fillMaxWidth(),
+        title = stringResource(R.string.app_name),
+        summary = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
         show = showDialog,
         onDismissRequest = { dismissDialog(showDialog) },
         content = {
             Column {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-            Column(
-                modifier = Modifier.padding(top = 12.dp)
-            ) {
                 val uriHandler = LocalUriHandler.current
                 Row(
                     verticalAlignment = Alignment.CenterVertically
