@@ -2,6 +2,7 @@ package top.yukonga.hq_icon.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Data
@@ -72,7 +72,7 @@ fun PlatformView(
         Column {
             platform.forEach { text ->
                 SuperCheckbox(
-                    insideMargin = DpSize(12.dp, 12.dp),
+                    insideMargin = PaddingValues(12.dp),
                     title = text,
                     checked = (text == selectedOption),
                     onCheckedChange = {
@@ -101,7 +101,7 @@ fun CornerView(
         Column {
             corner.forEach { text ->
                 SuperCheckbox(
-                    insideMargin = DpSize(12.dp, 12.dp),
+                    insideMargin = PaddingValues(12.dp),
                     title = text,
                     checked = (text == selectedOption),
                     onCheckedChange = {
@@ -130,8 +130,8 @@ fun ResolutionView(
         Column {
             resolution.forEach { text ->
                 SuperCheckbox(
-                    Modifier,
-                    insideMargin = DpSize(12.dp, 12.dp),
+                    modifier = Modifier,
+                    insideMargin = PaddingValues(12.dp),
                     title = text,
                     checked = (text == selectedOption),
                     onCheckedChange = {

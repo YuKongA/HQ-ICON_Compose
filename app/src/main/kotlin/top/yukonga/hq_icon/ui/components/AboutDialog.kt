@@ -68,7 +68,10 @@ fun AboutDialog() {
                     Text(
                         text = AnnotatedString(
                             text = "GitHub",
-                            spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MiuixTheme.colorScheme.primary)
+                            spanStyle = SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                color = MiuixTheme.colorScheme.primary
+                            )
                         ),
                         modifier = Modifier.clickable(
                             onClick = {
@@ -87,7 +90,10 @@ fun AboutDialog() {
                     Text(
                         text = AnnotatedString(
                             text = "Telegram",
-                            spanStyle = SpanStyle(textDecoration = TextDecoration.Underline, color = MiuixTheme.colorScheme.primary)
+                            spanStyle = SpanStyle(
+                                textDecoration = TextDecoration.Underline,
+                                color = MiuixTheme.colorScheme.primary
+                            )
                         ),
                         modifier = Modifier.clickable(
                             onClick = {

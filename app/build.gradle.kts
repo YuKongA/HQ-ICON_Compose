@@ -1,5 +1,4 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 plugins {
@@ -58,7 +57,6 @@ android {
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
-            applicationIdSuffix = ".debug"
         }
     }
     androidResources.generateLocaleConfig = true
@@ -81,12 +79,8 @@ android {
 }
 
 fun getGitCommitCount(): Int {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-list", "--count", "HEAD")
-        standardOutput = out
-    }
-    return out.toString().trim().toInt()
+    val process = Runtime.getRuntime().exec(arrayOf("git", "rev-list", "--count", "HEAD"))
+    return process.inputStream.bufferedReader().use { it.readText().trim().toInt() }
 }
 
 fun getVersionCode(): Int {

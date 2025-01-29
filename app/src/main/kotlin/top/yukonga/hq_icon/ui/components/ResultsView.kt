@@ -33,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import top.yukonga.hq_icon.R
@@ -177,7 +178,7 @@ fun MessageText(text: String, style: TextStyle) {
 
 @Composable
 fun networkImage(url: String, corner: String, resolution: Int): ImageBitmap {
-    val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(Bitmap.createBitmap(resolution, resolution, Bitmap.Config.ARGB_8888)) }
+    val bitmapState: MutableState<Bitmap> = remember { mutableStateOf(createBitmap(resolution, resolution)) }
     val realUrl = url.replace("512x512bb.jpg", "${resolution}x${resolution}bb.png")
     val coroutineScope = rememberCoroutineScope()
 

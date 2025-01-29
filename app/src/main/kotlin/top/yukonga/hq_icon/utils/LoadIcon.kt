@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Shader
 import androidx.core.graphics.PathParser
+import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -25,7 +26,7 @@ class LoadIcon {
     }
 
     fun roundCorners(bitmap: Bitmap, corner: String): Bitmap {
-        val output = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        val output = createBitmap(bitmap.width, bitmap.height)
         val canvas = Canvas(output)
 
         val paint = Paint().apply {

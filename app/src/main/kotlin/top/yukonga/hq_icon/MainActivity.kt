@@ -1,5 +1,6 @@
 package top.yukonga.hq_icon
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -39,8 +40,8 @@ import androidx.compose.ui.util.lerp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import top.yukonga.hq_icon.data.Response
 import top.yukonga.hq_icon.ui.components.AboutDialog
@@ -53,11 +54,12 @@ import top.yukonga.hq_icon.utils.Preferences
 import top.yukonga.hq_icon.utils.Search
 import top.yukonga.hq_icon.utils.Utils
 import top.yukonga.hq_icon.viewModel.ResultsViewModel
-import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.LazyColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -82,6 +84,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun App(
     resultsViewModel: ResultsViewModel
@@ -125,7 +128,7 @@ fun App(
                     TopAppBar(
                         color = Color.Transparent,
                         modifier = Modifier
-                            .hazeChild(
+                            .hazeEffect(
                                 state = hazeState,
                                 style = hazeStyleTopAppBar
                             ),
@@ -138,7 +141,7 @@ fun App(
                 BoxWithConstraints(
                     Modifier
                         .padding(top = padding.calculateTopPadding())
-                        .haze(state = hazeState)
+                        .hazeSource(state = hazeState)
                 ) {
                     if (maxWidth < 768.dp) {
                         LazyColumn(
@@ -227,12 +230,12 @@ private fun Button(
     val searching = stringResource(R.string.searching)
     val appNameEmpty = stringResource(R.string.appNameEmpty)
 
-    Button(
+    TextButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
         text = stringResource(R.string.submit),
-        submit = true,
+        colors = ButtonDefaults.textButtonColorsPrimary(),
         onClick = {
             if (term.value == "") {
                 Toast.makeText(context, appNameEmpty, Toast.LENGTH_SHORT).show()
