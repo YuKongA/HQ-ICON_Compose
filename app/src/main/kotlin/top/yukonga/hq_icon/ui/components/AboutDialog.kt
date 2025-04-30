@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +25,10 @@ import top.yukonga.hq_icon.R
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtil.Companion.dismissDialog
+import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.dismissDialog
 
 @Composable
 fun AboutDialog() {
@@ -36,16 +36,16 @@ fun AboutDialog() {
     val hapticFeedback = LocalHapticFeedback.current
 
     IconButton(
-        modifier = Modifier
-            .padding(start = 20.dp),
+        modifier = Modifier.padding(end = 12.dp),
         onClick = {
             showDialog.value = true
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        }
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+        },
+        holdDownState = showDialog.value
     ) {
         Image(
             modifier = Modifier.size(24.dp),
-            imageVector = Icons.Outlined.ImageSearch,
+            imageVector = MiuixIcons.Useful.Info,
             contentDescription = null,
             colorFilter = ColorFilter.tint(MiuixTheme.colorScheme.onSurface)
         )
@@ -98,7 +98,7 @@ fun AboutDialog() {
                         modifier = Modifier.clickable(
                             onClick = {
                                 uriHandler.openUri("https://t.me/YuKongA13579")
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
                             },
                         )
                     )

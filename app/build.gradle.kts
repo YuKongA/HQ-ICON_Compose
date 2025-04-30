@@ -11,12 +11,12 @@ plugins {
 @Suppress("UnstableApiUsage")
 android {
     namespace = "top.yukonga.hq_icon"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = namespace
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = getVersionCode()
         versionName = "1.3.0"
 
@@ -52,8 +52,12 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             vcsInfo.include = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName(if (keystorePath != null) "github" else "release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig =
+                signingConfigs.getByName(if (keystorePath != null) "github" else "release")
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
@@ -70,7 +74,8 @@ android {
     packaging {
         applicationVariants.all {
             outputs.all {
-                (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-v$versionName($versionCode)-$name.apk"
+                (this as BaseVariantOutputImpl).outputFileName =
+                    "HQ_ICON-v$versionName($versionCode)-$name.apk"
             }
         }
         resources.excludes += "**"
@@ -91,14 +96,10 @@ fun getVersionCode(): Int {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.foundation.android)
-    implementation(libs.androidx.foundation.layout.android)
-    implementation(libs.androidx.material.icons.extended.android)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
 
-    implementation(libs.androidx.compose.material3)
     implementation(libs.miuix)
     implementation(libs.haze)
 
@@ -106,5 +107,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
 
+    debugImplementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
 }

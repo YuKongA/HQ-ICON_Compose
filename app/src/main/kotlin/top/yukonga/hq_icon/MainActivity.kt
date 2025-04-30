@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,7 +57,6 @@ import top.yukonga.hq_icon.utils.Search
 import top.yukonga.hq_icon.utils.Utils
 import top.yukonga.hq_icon.viewModel.ResultsViewModel
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.LazyColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Surface
@@ -64,6 +65,7 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.getWindowSize
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 class MainActivity : ComponentActivity() {
 
@@ -133,7 +135,7 @@ fun App(
                                 style = hazeStyleTopAppBar
                             ),
                         title = stringResource(R.string.app_name),
-                        navigationIcon = { AboutDialog() },
+                        actions = { AboutDialog() },
                         scrollBehavior = scrollBehavior
                     )
                 }
@@ -147,11 +149,13 @@ fun App(
                         LazyColumn(
                             modifier = Modifier
                                 .height(getWindowSize().height.dp)
+                                .overScrollVertical()
+                                .nestedScroll(scrollBehavior.nestedScrollConnection)
                                 .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
                                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
                                 .padding(top = 12.dp)
                                 .padding(horizontal = 12.dp),
-                            topAppBarScrollBehavior = scrollBehavior
+                            overscrollEffect = null
                         ) {
                             item {
                                 Column(modifier = Modifier.navigationBarsPadding()) {
@@ -171,10 +175,12 @@ fun App(
                             LazyColumn(
                                 modifier = Modifier
                                     .height(getWindowSize().height.dp)
+                                    .overScrollVertical()
+                                    .nestedScroll(scrollBehavior.nestedScrollConnection)
                                     .padding(top = 12.dp)
                                     .padding(horizontal = 12.dp)
                                     .weight(1f),
-                                topAppBarScrollBehavior = scrollBehavior
+                                overscrollEffect = null
                             ) {
                                 item {
                                     Column(
@@ -182,8 +188,7 @@ fun App(
                                     ) {
                                         Row {
                                             Column(
-                                                modifier = Modifier
-                                                    .weight(0.8f)
+                                                modifier = Modifier.weight(0.8f)
                                             ) {
                                                 MainCardView(appName, country)
                                                 SecondCardView(platformCode, cornerState, resolutionCode)
@@ -196,11 +201,12 @@ fun App(
                             }
                             LazyColumn(
                                 modifier = Modifier
-                                    .padding(end = 12.dp)
                                     .weight(1f)
                                     .height(getWindowSize().height.dp)
-                                    .padding(top = 12.dp),
-                                topAppBarScrollBehavior = scrollBehavior
+                                    .overScrollVertical()
+                                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                                    .padding(top = 12.dp, end = 12.dp),
+                                overscrollEffect = null
                             ) {
                                 item {
                                     Column(modifier = Modifier.navigationBarsPadding()) {

@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Data
@@ -38,7 +37,6 @@ fun AppNameView(
 ) {
     val focusManager = LocalFocusManager.current
     TextField(
-        insideMargin = DpSize(16.dp, 20.dp),
         modifier = Modifier.fillMaxWidth(),
         value = appName.value,
         onValueChange = { appName.value = it },

@@ -56,5 +56,6 @@ class Data {
         return corner.cornerName
     }
 
-    val country = listOf("CN", "US", "JP", "KR")
+    val country =
+        listOf("CN", "US", "JP", "KR", "TW", "HK", "SG", "GB", "DE", "FR", "IT", "ES", "RU", "BR", "IN", "ID", "TH", "VN", "PH")
 }
