@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -135,15 +136,13 @@ fun App(
                                 style = hazeStyleTopAppBar
                             ),
                         title = stringResource(R.string.app_name),
-                        actions = { AboutDialog() },
+                        navigationIcon = { AboutDialog() },
                         scrollBehavior = scrollBehavior
                     )
                 }
             ) { padding ->
                 BoxWithConstraints(
-                    Modifier
-                        .padding(top = padding.calculateTopPadding())
-                        .hazeSource(state = hazeState)
+                    Modifier.hazeSource(state = hazeState)
                 ) {
                     if (maxWidth < 768.dp) {
                         LazyColumn(
@@ -159,6 +158,7 @@ fun App(
                         ) {
                             item {
                                 Column(modifier = Modifier.navigationBarsPadding()) {
+                                    Spacer(Modifier.height(padding.calculateTopPadding()))
                                     MainCardView(appName, country)
                                     SecondCardView(platformCode, cornerState, resolutionCode)
                                     Button(appName, country, platformCode, limit, cornerState, resultsViewModel)
@@ -172,6 +172,7 @@ fun App(
                                 .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
                                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
                         ) {
+
                             LazyColumn(
                                 modifier = Modifier
                                     .height(getWindowSize().height.dp)
@@ -183,6 +184,7 @@ fun App(
                                 overscrollEffect = null
                             ) {
                                 item {
+                                    Spacer(Modifier.height(padding.calculateTopPadding()))
                                     Column(
                                         modifier = Modifier.navigationBarsPadding()
                                     ) {
@@ -209,6 +211,7 @@ fun App(
                                 overscrollEffect = null
                             ) {
                                 item {
+                                    Spacer(Modifier.height(padding.calculateTopPadding()))
                                     Column(modifier = Modifier.navigationBarsPadding()) {
                                         ResultsView(results, corner, resolution)
                                     }
