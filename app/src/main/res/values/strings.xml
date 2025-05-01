@@ -7,8 +7,9 @@
     <string name="platform">Platform:</string>
     <string name="corner">Corner:</string>
     <string name="resolution">Resolution:</string>
+    <string name="about">About</string>
     <string name="view_source">View Source:</string>
-    <string name="join_group">Join Group:</string>
+    <string name="join_channel">Join Channel:</string>
     <string name="download">Download</string>
     <string name="download_successful">Download successful</string>
     <string name="download_failed">Download failed</string>

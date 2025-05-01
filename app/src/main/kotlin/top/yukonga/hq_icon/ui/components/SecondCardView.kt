@@ -1,8 +1,8 @@
 package top.yukonga.hq_icon.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +11,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
@@ -37,14 +38,28 @@ fun SecondCardView(
                 .weight(1f)
                 .padding(end = 6.dp)
         ) {
-            PlatformView(platformCode)
+            OptionSelectionView(
+                titleResId = R.string.platform,
+                options = Data().platformNames,
+                preferenceKey = "platform",
+                nameToCodeConverter = { Data().platformCode(it) },
+                codeToNameConverter = { Data().platformName(it) },
+                selectedCodeState = platformCode
+            )
         }
         Card(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 6.dp)
         ) {
-            CornerView(cornerCode)
+            OptionSelectionView(
+                titleResId = R.string.corner,
+                options = Data().cornerNames,
+                preferenceKey = "corner",
+                nameToCodeConverter = { Data().cornerCode(it) },
+                codeToNameConverter = { Data().cornerName(it) },
+                selectedCodeState = cornerCode
+            )
         }
     }
     Card(
@@ -52,92 +67,46 @@ fun SecondCardView(
             .fillMaxWidth()
             .padding(vertical = 12.dp)
     ) {
-        ResolutionView(resolutionCode)
+        OptionSelectionView(
+            titleResId = R.string.resolution,
+            options = Data().resolutionNames,
+            preferenceKey = "resolution",
+            nameToCodeConverter = { Data().resolutionCode(it) },
+            codeToNameConverter = { Data().resolutionName(it) },
+            selectedCodeState = resolutionCode
+        )
     }
 }
 
 @Composable
-fun PlatformView(
-    platformCode: MutableState<String>
+private fun OptionSelectionView(
+    @StringRes titleResId: Int,
+    options: List<String>,
+    preferenceKey: String,
+    nameToCodeConverter: (String) -> String,
+    codeToNameConverter: (String) -> String?,
+    selectedCodeState: MutableState<String>
 ) {
-    val platform = Data().platformNames
-
+    val focusManager = LocalFocusManager.current
+    val initialName = Preferences().perfGet(preferenceKey)?.let { codeToNameConverter(it) } ?: options.getOrElse(0) { "" }
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(initialName) }
+    selectedCodeState.value = nameToCodeConverter(selectedOption)
     Column {
         Text(
-            modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp),
-            text = stringResource(R.string.platform)
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
+            text = stringResource(titleResId)
         )
-        val platformName = Preferences().perfGet("platform")?.let { Data().platformName(it) } ?: platform[0]
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(platformName) }
         Column {
-            platform.forEach { text ->
+            options.forEach { text ->
                 SuperCheckbox(
-                    insideMargin = PaddingValues(12.dp),
                     title = text,
                     checked = (text == selectedOption),
                     onCheckedChange = {
                         onOptionSelected(text)
-                        platformCode.value = Data().platformCode(text)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CornerView(
-    cornerCode: MutableState<String>
-) {
-    val corner = Data().cornerNames
-
-    Column {
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp),
-            text = stringResource(R.string.corner)
-        )
-        val cornerName = Preferences().perfGet("corner")?.let { Data().cornerName(it) } ?: corner[0]
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(cornerName) }
-        Column {
-            corner.forEach { text ->
-                SuperCheckbox(
-                    insideMargin = PaddingValues(12.dp),
-                    title = text,
-                    checked = (text == selectedOption),
-                    onCheckedChange = {
-                        onOptionSelected(text)
-                        cornerCode.value = Data().cornerCode(text)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ResolutionView(
-    resolutionCode: MutableState<String>
-) {
-    val resolution = Data().resolutionNames
-
-    Column {
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp),
-            text = stringResource(R.string.resolution)
-        )
-        val resolutionName = Preferences().perfGet("resolution")?.let { Data().resolutionName(it) } ?: resolution[0]
-        val (selectedOption, onOptionSelected) = remember { mutableStateOf(resolutionName) }
-        Column {
-            resolution.forEach { text ->
-                SuperCheckbox(
-                    modifier = Modifier,
-                    insideMargin = PaddingValues(12.dp),
-                    title = text,
-                    checked = (text == selectedOption),
-                    onCheckedChange = {
-                        onOptionSelected(text)
-                        resolutionCode.value = Data().resolutionCode(text)
-                        Preferences().perfSet("resolution", Data().resolutionCode(text))
+                        val code = nameToCodeConverter(text)
+                        selectedCodeState.value = code
+                        Preferences().perfSet(preferenceKey, code)
+                        focusManager.clearFocus()
                     }
                 )
             }

@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -93,6 +95,7 @@ fun App(
     resultsViewModel: ResultsViewModel
 ) {
     AppTheme {
+        val focusManager = LocalFocusManager.current
         val scrollBehavior = MiuixScrollBehavior(rememberTopAppBarState())
 
         val appName = remember { mutableStateOf(Preferences().perfGet("appName") ?: "") }
@@ -112,29 +115,35 @@ fun App(
         }
 
         val hazeState = remember { HazeState() }
-
-        val hazeStyleTopAppBar = HazeStyle(
-            blurRadius = 25.dp,
-            backgroundColor = if (scrollBehavior.state.heightOffset > -1) Color.Transparent else MiuixTheme.colorScheme.background,
+        val hazeStyle = HazeStyle(
+            backgroundColor = MiuixTheme.colorScheme.background,
             tint = HazeTint(
                 MiuixTheme.colorScheme.background.copy(
-                    if (scrollBehavior.state.heightOffset > -1) 1f
-                    else lerp(1f, 0.67f, (scrollBehavior.state.heightOffset + 1) / -143f)
+                    if (scrollBehavior.state.collapsedFraction <= 0f) 1f
+                    else lerp(1f, 0.67f, (scrollBehavior.state.collapsedFraction))
                 )
             )
         )
         Surface(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    indication = null,
+                    interactionSource = null,
+                ) {
+                    focusManager.clearFocus()
+                }
         ) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         color = Color.Transparent,
                         modifier = Modifier
-                            .hazeEffect(
-                                state = hazeState,
-                                style = hazeStyleTopAppBar
-                            ),
+                            .hazeEffect(hazeState) {
+                                style = hazeStyle
+                                blurRadius = 25.dp
+                                noiseFactor = 0f
+                            },
                         title = stringResource(R.string.app_name),
                         navigationIcon = { AboutDialog() },
                         scrollBehavior = scrollBehavior
@@ -234,18 +243,20 @@ private fun Button(
     cornerState: MutableState<String>,
     resultsViewModel: ResultsViewModel
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
     val searching = stringResource(R.string.searching)
     val appNameEmpty = stringResource(R.string.appNameEmpty)
 
     TextButton(
+        text = stringResource(R.string.submit),
+        colors = ButtonDefaults.textButtonColorsPrimary(),
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
-        text = stringResource(R.string.submit),
-        colors = ButtonDefaults.textButtonColorsPrimary(),
         onClick = {
+            focusManager.clearFocus()
             if (term.value == "") {
                 Toast.makeText(context, appNameEmpty, Toast.LENGTH_SHORT).show()
             } else {
@@ -255,7 +266,6 @@ private fun Button(
                         val results = Search().search(term.value, country.value, platform.value, limit.value)
                         val response = Utils().json.decodeFromString<Response.Root>(results)
                         resultsViewModel.updateResults(response.results)
-
                         Preferences().perfSet("appName", term.value)
                         Preferences().perfSet("country", country.value)
                         Preferences().perfSet("platform", platform.value)

@@ -18,9 +18,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = getVersionCode()
-        versionName = "1.3.0"
-
-        vectorDrawables.useSupportLibrary = true
+        versionName = "1.4.0"
     }
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
@@ -52,12 +50,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             vcsInfo.include = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            signingConfig =
-                signingConfigs.getByName(if (keystorePath != null) "github" else "release")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName(if (keystorePath != null) "github" else "release")
         }
         debug {
             if (keystorePath != null) signingConfig = signingConfigs.getByName("github")
@@ -74,8 +68,7 @@ android {
     packaging {
         applicationVariants.all {
             outputs.all {
-                (this as BaseVariantOutputImpl).outputFileName =
-                    "HQ_ICON-v$versionName($versionCode)-$name.apk"
+                (this as BaseVariantOutputImpl).outputFileName = "HQ_ICON-v$versionName($versionCode)-$name.apk"
             }
         }
         resources.excludes += "**"

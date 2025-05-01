@@ -11,6 +11,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -40,10 +40,10 @@ import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Response
 import top.yukonga.hq_icon.utils.Download
 import top.yukonga.hq_icon.utils.LoadIcon
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -72,7 +72,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
             modifier = Modifier.padding(bottom = 12.dp)
         ) {
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
@@ -88,7 +88,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
                 )
                 Column(
                     modifier = Modifier
-                        .padding(start = 12.dp)
+                        .padding(start = 16.dp)
                         .weight(1f)
                 ) {
                     MessageText(
@@ -104,12 +104,12 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
                         style = MiuixTheme.textStyles.subtitle
                     )
                 }
-                IconButton(
-                    modifier = Modifier
-                        .padding(start = 12.dp),
-                    minHeight = 30.dp,
-                    cornerRadius = 20.dp,
-                    backgroundColor = MiuixTheme.colorScheme.primary,
+                TextButton(
+                    text = stringResource(R.string.download),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    modifier = Modifier.padding(start = 16.dp),
+                    insideMargin = PaddingValues(horizontal = 12.dp),
+                    minHeight = 32.dp,
                     onClick = {
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                         coroutineScope.launch {
@@ -122,18 +122,7 @@ fun ResultItemView(result: Response.Result, corner: String, resolution: String) 
                             )
                         }
                     }
-                ) {
-                    Surface(
-                        color = Color.Transparent,
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.download),
-                            color = MiuixTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
+                )
             }
         }
     }

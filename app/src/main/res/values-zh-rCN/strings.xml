@@ -6,8 +6,9 @@
     <string name="platform">平台:</string>
     <string name="corner">圆角:</string>
     <string name="resolution">分辨率:</string>
+    <string name="about">关于</string>
     <string name="view_source">查看源码:</string>
-    <string name="join_group">加入群组:</string>
+    <string name="join_channel">加入频道:</string>
     <string name="download">下载</string>
     <string name="download_successful">下载成功</string>
     <string name="download_failed">下载失败</string>
