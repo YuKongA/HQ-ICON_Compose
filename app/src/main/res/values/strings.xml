@@ -20,4 +20,5 @@
     <string name="system_default">System default</string>
     <string name="light_mode">Light mode</string>
     <string name="dark_mode">Dark mode</string>
+    <string name="network_error">Network error or no response from server</string>
 </resources>

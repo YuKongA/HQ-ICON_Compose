@@ -264,6 +264,10 @@ private fun Button(
                 coroutineScope.launch {
                     if (term.value != "") {
                         val results = Search().search(term.value, country.value, platform.value, limit.value)
+                        results.takeIf { it.isBlank() }?.also {
+                            Toast.makeText(context, R.string.network_error, Toast.LENGTH_SHORT).show()
+                            return@launch
+                        }
                         val response = Utils().json.decodeFromString<Response.Root>(results)
                         resultsViewModel.updateResults(response.results)
                         Preferences().perfSet("appName", term.value)
