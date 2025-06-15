@@ -19,4 +19,5 @@
     <string name="system_default">跟随系统</string>
     <string name="light_mode">浅色模式</string>
     <string name="dark_mode">深色模式</string>
+    <string name="network_error">网络异常或服务器无响应</string>
 </resources>
