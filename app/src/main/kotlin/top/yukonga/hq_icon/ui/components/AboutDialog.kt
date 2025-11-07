@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +36,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.dismissDialog
-import top.yukonga.miuix.kmp.utils.SmoothRoundedCornerShape
 
 @Composable
 fun AboutDialog() {
@@ -51,7 +49,7 @@ fun AboutDialog() {
             showDialog.value = true
             focusManager.clearFocus()
         },
-        holdDownState = showDialog.value
+        holdDownState = showDialog.value,
     ) {
         Image(
             painter = icon,
@@ -60,10 +58,10 @@ fun AboutDialog() {
                 .size(42.dp)
                 .graphicsLayer(
                     scaleX = 0.5f,
-                    scaleY = 0.5f
+                    scaleY = 0.5f,
                 ),
             colorFilter = ColorFilter.tint(MiuixTheme.colorScheme.onSurface),
-            contentScale = ContentScale.None
+            contentScale = ContentScale.None,
         )
     }
 
@@ -71,48 +69,44 @@ fun AboutDialog() {
         show = showDialog,
         title = stringResource(R.string.about),
         onDismissRequest = {
-            dismissDialog(showDialog)
+            showDialog.value = false
         }
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(bottom = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
                     .size(45.dp)
-                    .background(color = MiuixTheme.colorScheme.primary, shape = SmoothRoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.Center
+                    .background(color = MiuixTheme.colorScheme.primary, shape = RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center,
             ) {
                 Image(
                     painter = icon,
                     contentDescription = "About",
                     modifier = Modifier.graphicsLayer(
                         scaleX = 0.58f,
-                        scaleY = 0.58f
+                        scaleY = 0.58f,
                     ),
-                    contentScale = ContentScale.None
+                    contentScale = ContentScale.None,
                 )
             }
             Column {
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.app_name),
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+                    text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                 )
             }
         }
         val uriHandler = LocalUriHandler.current
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.view_source) + " ",
@@ -122,10 +116,9 @@ fun AboutDialog() {
                     text = "GitHub",
                     spanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
-                        color = MiuixTheme.colorScheme.primary
+                        color = MiuixTheme.colorScheme.primary,
                     )
                 ),
-                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable(
                     onClick = {
                         uriHandler.openUri("https://github.com/YuKongA/HQ-ICON_Compose")
@@ -134,7 +127,7 @@ fun AboutDialog() {
             )
         }
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.join_channel) + " ",
@@ -144,10 +137,9 @@ fun AboutDialog() {
                     text = "Telegram",
                     spanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
-                        color = MiuixTheme.colorScheme.primary
+                        color = MiuixTheme.colorScheme.primary,
                     )
                 ),
-                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.clickable(
                     onClick = {
                         uriHandler.openUri("https://t.me/YuKongA13579")

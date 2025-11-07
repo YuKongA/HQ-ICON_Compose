@@ -61,7 +61,7 @@ fun TextFieldWithDropdown(
                 showPopup.value = false
             },
             alignment = PopupPositionProvider.Align.TopLeft,
-            windowDimming = false,
+            enableWindowDim = false,
             maxHeight = 250.dp
         ) {
             if (items.isNotEmpty()) {

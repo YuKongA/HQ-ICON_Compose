@@ -10,8 +10,11 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "top.yukonga.hq_icon"
     compileSdk = 36
+    compileSdkMinor = 1
+    buildToolsVersion = "36.1.0"
+
+    namespace = "top.yukonga.hq_icon"
 
     defaultConfig {
         applicationId = namespace
@@ -20,6 +23,7 @@ android {
         versionCode = getVersionCode()
         versionName = "1.4.0"
     }
+
     val properties = Properties()
     runCatching { properties.load(project.rootProject.file("local.properties").inputStream()) }
     val keystorePath = properties.getProperty("KEYSTORE_PATH") ?: System.getenv("KEYSTORE_PATH")
@@ -73,7 +77,6 @@ android {
         }
         resources.excludes += "**"
     }
-
 }
 
 fun getGitCommitCount(): Int {
@@ -92,6 +95,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.window)
 
     implementation(libs.miuix)
     implementation(libs.haze)

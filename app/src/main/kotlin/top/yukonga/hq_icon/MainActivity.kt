@@ -1,6 +1,5 @@
 package top.yukonga.hq_icon
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -9,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,11 +36,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.window.layout.WindowMetricsCalculator
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -89,7 +90,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun App(
     resultsViewModel: ResultsViewModel
@@ -124,6 +124,7 @@ fun App(
                 )
             )
         )
+
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -150,10 +151,16 @@ fun App(
                     )
                 }
             ) { padding ->
-                BoxWithConstraints(
+                val configuration = LocalConfiguration.current
+                val context = LocalContext.current
+                val windowMetrics = remember(configuration, context) {
+                    WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+                }
+                val widthDp = windowMetrics.bounds.width() / windowMetrics.density
+                Box(
                     Modifier.hazeSource(state = hazeState)
                 ) {
-                    if (maxWidth < 768.dp) {
+                    if (widthDp < 768) {
                         LazyColumn(
                             modifier = Modifier
                                 .height(getWindowSize().height.dp)
@@ -181,7 +188,6 @@ fun App(
                                 .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
                                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
                         ) {
-
                             LazyColumn(
                                 modifier = Modifier
                                     .height(getWindowSize().height.dp)
