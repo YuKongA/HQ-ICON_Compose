@@ -116,9 +116,9 @@ fun App(
 
         val hazeState = remember { HazeState() }
         val hazeStyle = HazeStyle(
-            backgroundColor = MiuixTheme.colorScheme.background,
+            backgroundColor = MiuixTheme.colorScheme.surface,
             tint = HazeTint(
-                MiuixTheme.colorScheme.background.copy(
+                MiuixTheme.colorScheme.surface.copy(
                     if (scrollBehavior.state.collapsedFraction <= 0f) 1f
                     else lerp(1f, 0.67f, (scrollBehavior.state.collapsedFraction))
                 )

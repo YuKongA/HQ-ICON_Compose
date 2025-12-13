@@ -3,6 +3,7 @@ package top.yukonga.hq_icon.ui.components
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,18 +48,19 @@ fun SecondCardView(
                 selectedCodeState = platformCode
             )
         }
+
         Card(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 6.dp)
         ) {
             OptionSelectionView(
-                titleResId = R.string.corner,
-                options = Data().cornerNames,
-                preferenceKey = "corner",
-                nameToCodeConverter = { Data().cornerCode(it) },
-                codeToNameConverter = { Data().cornerName(it) },
-                selectedCodeState = cornerCode
+                titleResId = R.string.resolution,
+                options = Data().resolutionNames,
+                preferenceKey = "resolution",
+                nameToCodeConverter = { Data().resolutionCode(it) },
+                codeToNameConverter = { Data().resolutionName(it) },
+                selectedCodeState = resolutionCode
             )
         }
     }
@@ -68,12 +70,12 @@ fun SecondCardView(
             .padding(vertical = 12.dp)
     ) {
         OptionSelectionView(
-            titleResId = R.string.resolution,
-            options = Data().resolutionNames,
-            preferenceKey = "resolution",
-            nameToCodeConverter = { Data().resolutionCode(it) },
-            codeToNameConverter = { Data().resolutionName(it) },
-            selectedCodeState = resolutionCode
+            titleResId = R.string.corner,
+            options = Data().cornerNames,
+            preferenceKey = "corner",
+            nameToCodeConverter = { Data().cornerCode(it) },
+            codeToNameConverter = { Data().cornerName(it) },
+            selectedCodeState = cornerCode
         )
     }
 }
@@ -97,7 +99,7 @@ private fun OptionSelectionView(
             text = stringResource(titleResId)
         )
         Column {
-            options.forEach { text ->
+            options.forEachIndexed { index, text ->
                 SuperCheckbox(
                     title = text,
                     checked = (text == selectedOption),
@@ -107,7 +109,13 @@ private fun OptionSelectionView(
                         selectedCodeState.value = code
                         Preferences().perfSet(preferenceKey, code)
                         focusManager.clearFocus()
-                    }
+                    },
+                    insideMargin = PaddingValues(
+                        top = 8.dp,
+                        bottom = if (index == options.lastIndex) 16.dp else 8.dp,
+                        start = 16.dp,
+                        end = 16.dp
+                    ),
                 )
             }
         }

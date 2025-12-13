@@ -5,7 +5,8 @@ class Data {
 
     private val platformList = listOf(
         PlatformData("iOS", "software"),
-        PlatformData("macOS", "macSoftware")
+        PlatformData("iPadOS", "iPadSoftware"),
+        PlatformData("macOS", "desktopSoftware")
     )
     val platformNames = platformList.map { it.platformName }
 

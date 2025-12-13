@@ -20,7 +20,6 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.DropdownImpl
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun TextFieldWithDropdown(
@@ -48,7 +47,6 @@ fun TextFieldWithDropdown(
             },
             singleLine = true,
             label = label,
-            backgroundColor = MiuixTheme.colorScheme.surface,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
                 focusManager.clearFocus()

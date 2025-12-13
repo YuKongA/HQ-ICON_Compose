@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import top.yukonga.hq_icon.R
 import top.yukonga.hq_icon.data.Data
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun MainCardView(
@@ -41,7 +40,6 @@ fun AppNameView(
         value = appName.value,
         onValueChange = { appName.value = it },
         label = stringResource(R.string.appName),
-        backgroundColor = MiuixTheme.colorScheme.surface,
         maxLines = 1,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
